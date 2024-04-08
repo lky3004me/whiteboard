@@ -63,7 +63,7 @@ class DrawInfo {
 
             setLocationRelativeTo(null);
             this.setVisible(true);
-        }//
+        }
         public DrawFrame(CMServerStub m_serverStub){
             super("서버");
             this.m_serverStub = m_serverStub;
