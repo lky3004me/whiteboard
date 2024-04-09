@@ -52,6 +52,10 @@ class DrawInfo {
         public CMServerStub m_serverStub = null;
         public boolean isClient = false; //클라이언트: true 서버: false
         private int x; private int y; private int x1; private int y1;
+
+        public JButton exitBtn = new JButton("나가기");
+        public JPanel btnPanel = new JPanel();
+
         public DrawFrame(CMClientStub m_clientStub){
             super("클라이언트");
             this.m_clientStub = m_clientStub;
@@ -60,6 +64,13 @@ class DrawInfo {
             this.addMouseListener(this);
             this.addMouseMotionListener(this);
             this.setSize(500,500);
+
+
+            //나가기 버튼
+            //버튼에 이벤트 핸들러 등록, 상단에 버튼 추가
+            exitBtn.addActionListener(this);
+            btnPanel.add(exitBtn);
+            this.add(btnPanel, BorderLayout.NORTH);
 
             setLocationRelativeTo(null);
             this.setVisible(true);
@@ -72,6 +83,13 @@ class DrawInfo {
             this.addMouseListener(this);
             this.addMouseMotionListener(this);
             this.setSize(500,500);
+
+            //나가기 버튼
+            //버튼에 이벤트 핸들러 등록, 상단에 버튼 추가
+            exitBtn.addActionListener(this);
+            btnPanel.add(exitBtn);
+            this.add(btnPanel, BorderLayout.NORTH);
+
             setLocationRelativeTo(null);
             this.setVisible(true);
         }//
@@ -93,7 +111,10 @@ class DrawInfo {
         }
         @Override
         public void actionPerformed(ActionEvent e) {
-
+            if (e.getSource() == exitBtn){
+                //m_clientStub.terminateCM();
+                System.exit(0);
+           }
         }
 
         @Override
@@ -125,6 +146,7 @@ class DrawInfo {
             }
         }
 
+        //나가기 버튼 깜박거림 해결을 위해
         @Override
         public void mouseEntered(MouseEvent e) {
 
