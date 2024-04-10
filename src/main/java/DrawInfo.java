@@ -1,4 +1,7 @@
 import kr.ac.konkuk.ccslab.cm.event.CMDummyEvent;
+import kr.ac.konkuk.ccslab.cm.event.CMEvent;
+import kr.ac.konkuk.ccslab.cm.event.CMSessionEvent;
+import kr.ac.konkuk.ccslab.cm.info.CMConfigurationInfo;
 import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
 import kr.ac.konkuk.ccslab.cm.stub.CMServerStub;
 
@@ -112,9 +115,24 @@ class DrawInfo {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == exitBtn){
-                //m_clientStub.terminateCM();
+
+                //terminate를 제외하면 접속 해제를 알리는 기능이 존재
+                //m_clientStub.leaveSession();
+                //termiante는 모든 연결을 해제
+                //그러나 나갔다는 기록을 알리는게 없어서 주의 필요
+                //나갔는지의 상태는 99p CMInfo.CM_login
+                //server와 client 둘만 있을 때, server와 client 누가 눌렀는지 식별함
+
+                if(m_clientStub != null){
+                    m_clientStub.leaveSession();
+                    m_clientStub.logoutCM();
+                    m_clientStub.terminateCM();
+                }else if(m_clientStub != null){
+                    m_serverStub.terminateCM();
+                }
+
                 System.exit(0);
-           }
+            }
         }
 
         @Override
