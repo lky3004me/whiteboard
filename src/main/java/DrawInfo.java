@@ -10,6 +10,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Arrays;
 import java.util.Vector;
+
+import static java.lang.Math.abs;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //그림 정보 클래스
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25,15 +28,16 @@ class DrawInfo {
     private int color_B;
     private boolean fill;// 색 채우기 여부
     private int thickness; //선두께
+    private boolean nowDrawing = false;
 
     public DrawInfo(String type, int x, int y, int x1, int y1,
                     int color_R, int color_G, int color_B,
-                    boolean fill, int thickness) {
+                    boolean fill, int thickness,boolean nowDrawing) {
         this.type = type;
         this.x = x; this.y = y; this.x1 = x1; this.y1 = y1;
         this.color_R = color_R;this.color_G = color_G;this.color_B = color_B;
         this.color = new Color(color_R,color_G,color_B);
-        this.fill = fill; this.thickness = thickness;
+        this.fill = fill; this.thickness = thickness; this.nowDrawing = nowDrawing;
     }
     public void setX(int x){ this.x = x; }
     public void setY(int y){ this.y = y; }
@@ -46,74 +50,50 @@ class DrawInfo {
 
     public String getInfo(){
         //통신으로 보낼 문자열
-        return STR."\{type}#\{x}#\{y}#\{x1}#\{y1}#\{color_R}#\{color_G}#\{color_B}#\{fill}#\{thickness}";
+        return STR."\{type}#\{x}#\{y}#\{x1}#\{y1}#\{color_R}#\{color_G}#\{color_B}#\{fill}#\{thickness}#\{nowDrawing}";
     }
-    static class DrawFrame extends Frame implements MouseListener, MouseMotionListener, ItemListener, ActionListener {
+    static class DrawFrame extends JPanel implements MouseListener, MouseMotionListener, ItemListener, ActionListener {
         //그림판
+        private Vector vclist = new Vector<Vector>();
         private Vector vc = new Vector(); //좌표 정보 저장하는 벡터
-        private Boolean firstDrawing = true;
         public CMClientStub m_clientStub = null;
         public CMServerStub m_serverStub = null;
         public boolean isClient = false; //클라이언트: true 서버: false
         private int x; private int y; private int x1; private int y1;
         public Graphics Graphics_buffer; //더블버퍼링
         public Image Img_buffer;
-        public JFrame jFrame;
-        public JButton exitBtn = new JButton("나가기");
-        public JButton penBtn = new JButton("펜");
-        public JButton lineBtn = new JButton("직선");
-        public JButton cirBtn = new JButton("원");
-        public JButton recBtn = new JButton("사각형");
-        public JPanel btnPanel = new JPanel();
+        private String nowType = "pen";
+        private Color nowColor = Color.black;
+        private Boolean nowFill = false;
+        private int nowThickness = 3; //선두께
+        private boolean nowDrawing = false;
+        private DrawInfo tmpinfo = null;
+        private DrawInfo clearInfo = new DrawInfo("clear",0,0,0,0,0,0,0,false,0,false);
 
         public DrawFrame(CMClientStub m_clientStub){
-            super("클라이언트");
+            //super("클라이언트");
             this.m_clientStub = m_clientStub;
             isClient = true;
-
+            vc.add(clearInfo);
             this.addMouseListener(this);
             this.addMouseMotionListener(this);
             this.setSize(500,500);
 
-            //나가기 버튼
-            //버튼에 이벤트 핸들러 등록, 상단에 버튼 추가
-            exitBtn.addActionListener(this);
-            btnPanel.add(exitBtn);
 
-            penBtn.addActionListener(this);
-            btnPanel.add(penBtn);
-
-            lineBtn.addActionListener(this);
-            btnPanel.add(lineBtn);
-
-            cirBtn.addActionListener(this);
-            btnPanel.add(cirBtn);
-
-            recBtn.addActionListener(this);
-            btnPanel.add(recBtn);
-
-
-            this.add(btnPanel, BorderLayout.NORTH);
-
-            setLocationRelativeTo(null);
+            //setLocationRelativeTo(null);
             this.setVisible(true);
         }
         public DrawFrame(CMServerStub m_serverStub){
-            super("서버");
+            //super("서버");
             this.m_serverStub = m_serverStub;
             isClient = false;
-
+            vc.add(clearInfo);
             this.addMouseListener(this);
             this.addMouseMotionListener(this);
             this.setSize(500,500);
 
-            //나가기 버튼
-            //버튼에 이벤트 핸들러 등록, 상단에 버튼 추가
-            exitBtn.addActionListener(this);
-            btnPanel.add(exitBtn);
-            this.add(btnPanel, BorderLayout.NORTH);
 
-            setLocationRelativeTo(null);
+            //setLocationRelativeTo(null);
             this.setVisible(true);
         }//
         //@Override
@@ -129,40 +109,52 @@ class DrawInfo {
             Graphics_buffer.clearRect(0, 0, 500, 500); // 백지화
             for (int i = 0; i < vc.size(); i++) {
                 DrawInfo info = (DrawInfo) vc.elementAt(i);
-                Graphics_buffer.setColor(info.color);
-                ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
-                Graphics_buffer.drawLine(info.getX(), info.getY(), info.getX1(), info.getY1());
+                if (info.type.equals("pen")) {
+                    Graphics_buffer.setColor(info.color);
+                    ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
+                    Graphics_buffer.drawLine(info.getX(), info.getY(), info.getX(), info.getY());
+                }
+                else if (info.type.equals("line")) {
+                    Graphics_buffer.setColor(info.color);
+                    ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
+                    Graphics_buffer.drawLine(info.getX(), info.getY(), info.getX1(), info.getY1());
+                }
+                else if (info.type.equals("cir")) {
+                    Graphics_buffer.setColor(info.color);
+                    ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
+                    Graphics_buffer.drawOval(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+                }
+                else if (info.type.equals("rec")) {
+                    Graphics_buffer.setColor(info.color);
+                    ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
+                    Graphics_buffer.drawRect(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+                }
+                else{
+
+                }
+                if(info.nowDrawing){
+                    vc.remove(i);
+                    i--;
+                }
             }
-            g.drawImage(Img_buffer,0,0,this);
-            repaint();
+            g.drawImage(Img_buffer, 0, 0, this);
+            //repaint();
+
 
         }
-
+        public void setMode(String mode){
+            nowType = mode;
+        }
 
         public Vector getVc(){
             return vc;
         }
+        public void addVc(){
+            vclist.add(new Vector());
+        }
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == exitBtn){
 
-                //terminate를 제외하면 접속 해제를 알리는 기능이 존재
-                //m_clientStub.leaveSession();
-                //termiante는 모든 연결을 해제
-                //그러나 나갔다는 기록을 알리는게 없어서 주의 필요
-                //나갔는지의 상태는 99p CMInfo.CM_login
-                //server와 client 둘만 있을 때, server와 client 누가 눌렀는지 식별함
-
-                if(m_clientStub != null){
-                    m_clientStub.leaveSession();
-                    m_clientStub.logoutCM();
-                    m_clientStub.terminateCM();
-                }else if(m_clientStub != null){
-                    m_serverStub.terminateCM();
-                }
-
-                System.exit(0);
-            }
         }
 
         @Override
@@ -186,16 +178,39 @@ class DrawInfo {
         @Override
         public void mouseReleased(MouseEvent e) {
             if(isClient) {
+                tmpinfo = null;
                 x1 = e.getX();
                 y1 = e.getY();
-                DrawInfo di = new DrawInfo("PEN", x, y, x1, y1, 0, 0, 0, false, 3);
-                vc.add(di);
+                DrawInfo di;
+                if(nowType.equals("pen")){
+                    nowDrawing = false;
+                    di = new DrawInfo(nowType, x, y, x1, y1,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                    sendDrawInfo(di);
+                    x = x1;  //끝난 지점에서 다시 그려져야하므로
+                    y = y1;
+                }
+                if(nowType.equals("line")){
+                    nowDrawing = false;
+                    di = new DrawInfo(nowType, x, y, x1, y1,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                    sendDrawInfo(di);
+                }
+                if(nowType.equals("cir")||nowType.equals("rec")){
+                    nowDrawing = false;
+                    if(x<x1&&y<y1)
+                        di = new DrawInfo(nowType, x, y, x1, y1,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                    else if (x>x1&&y<y1)
+                        di = new DrawInfo(nowType, x1, y, x, y1,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                    else if (x<x1&&y>y1)
+                        di = new DrawInfo(nowType, x, y1, x1, y,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                    else
+                        di = new DrawInfo(nowType, x1, y1, x, y,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                    sendDrawInfo(di);
+                }
                 this.repaint();
 
             }
         }
 
-        //나가기 버튼 깜박거림 해결을 위해
         @Override
         public void mouseEntered(MouseEvent e) {
 
@@ -211,13 +226,33 @@ class DrawInfo {
             if(isClient) {
                 x1 = e.getX();
                 y1 = e.getY();
-                Color c = new Color(0, 0, 0);
-                DrawInfo di = new DrawInfo("PEN", x, y, x1, y1, 0, 0, 0, false, 3);
-                vc.add(di); //그리기 정보 객체를 벡터에 저장한다.
-                x = x1;  //끝난 지점에서 다시 그려져야하므로
-                y = y1;
+                DrawInfo di;
+                if(nowType.equals("pen")){
+                    nowDrawing = false;
+                    di = new DrawInfo(nowType, x, y, x1, y1,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                    sendDrawInfo(di);
+                    x = x1;  //끝난 지점에서 다시 그려져야하므로
+                    y = y1;
+                }
+                if(nowType.equals("line")){
+                    nowDrawing = true;
+                    di = new DrawInfo(nowType, x, y, x1, y1,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                    tmpinfo = di;
+                    sendDrawInfo(di);
+                }
+                if(nowType.equals("cir")||nowType.equals("rec")){
+                    nowDrawing = true;
+                    if(x<x1&&y<y1)
+                        di = new DrawInfo(nowType, x, y, x1, y1,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                    else if (x>x1&&y<y1)
+                        di = new DrawInfo(nowType, x1, y, x, y1,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                    else if (x<x1&&y>y1)
+                        di = new DrawInfo(nowType, x, y1, x1, y,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                    else
+                        di = new DrawInfo(nowType, x1, y1, x, y,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                    sendDrawInfo(di);
+                }
                 this.repaint();
-                sendDrawInfo();
             }
         }
 
@@ -225,26 +260,31 @@ class DrawInfo {
         public void mouseMoved(MouseEvent e) {
 
         }
-        public void sendDrawInfo(){
+
+
+        public void sendDrawInfo(DrawInfo info){
             if(isClient){
-                for (int i = 0; i<vc.size();i++){
-                    DrawInfo info = (DrawInfo) vc.elementAt(i);
-                    String strInput = info.getInfo();
-                    CMDummyEvent due = new CMDummyEvent();
-                    System.out.println(strInput);
-                    due.setDummyInfo(strInput);
-                    m_clientStub.send(due, m_clientStub.getDefaultServerName());
-                }
+                String strInput = info.getInfo();
+                CMDummyEvent due = new CMDummyEvent();
+                System.out.println(strInput);
+                due.setDummyInfo(strInput);
+                m_clientStub.send(due, m_clientStub.getDefaultServerName());
             }
         }
         public void receiveDrawInfo(String str){
-
             String[] strArr = str.split("#");
             DrawInfo strDrawInfo = new DrawInfo(strArr[0],Integer.parseInt(strArr[1]),Integer.parseInt(strArr[2]),Integer.parseInt(strArr[3]),Integer.parseInt(strArr[4]),
-                    Integer.parseInt(strArr[5]),Integer.parseInt(strArr[6]),Integer.parseInt(strArr[7]),Boolean.parseBoolean(strArr[8]),Integer.parseInt(strArr[9]));
+                    Integer.parseInt(strArr[5]),Integer.parseInt(strArr[6]),Integer.parseInt(strArr[7]),Boolean.parseBoolean(strArr[8]),Integer.parseInt(strArr[9]),Boolean.parseBoolean(strArr[10]));
+            if(strDrawInfo.type.equals("clear")){
+                vc.clear();
+            }
             vc.add(strDrawInfo);
+            if(!isClient){
+                CMDummyEvent due = new CMDummyEvent();
+                due.setDummyInfo(str);
+                //m_serverStub.cast(due, se.getSessionName(),se.getCurrentGroupName());
+            }
             this.repaint();
-
         }
     }
 

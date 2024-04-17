@@ -26,6 +26,21 @@ public class CMServerEventHandler implements CMAppEventHandler {
             case CMInfo.CM_DUMMY_EVENT:
                 processDummyEvent(cme);
                 break;
+            case CMInfo.CM_SESSION_EVENT:
+                processSessionEvent(cme);
+            default:
+                return;
+        }
+    }
+    private void processSessionEvent(CMEvent cme)
+    {
+        CMSessionEvent se = (CMSessionEvent) cme;
+        switch(se.getID())
+        {
+            case CMSessionEvent.LOGIN:
+                System.out.println("["+se.getUserName()+"] requests login.");
+                m_drawboard.addVc();
+                break;
             default:
                 return;
         }

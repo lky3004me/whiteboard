@@ -13,18 +13,27 @@ import java.awt.event.KeyListener;
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //서버 메인
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-public class CMServerApp  {
+public class CMServerApp extends JFrame{
     public CMServerStub m_serverStub;
     public CMServerEventHandler m_eventHandler;
     public DrawInfo.DrawFrame drawboard;
+    public TopMenu menu;
 
     public CMServerApp()
     {
-
+        super("서버");
+        this.setSize(500,600);
         m_serverStub = new CMServerStub();
+        setLocationRelativeTo(null);
+        BorderLayout border = new BorderLayout();
+        this.setLayout(border);
         drawboard = new DrawInfo.DrawFrame(m_serverStub);
+        menu = new TopMenu(m_serverStub,drawboard);
+        this.add(menu, BorderLayout.NORTH);
+        this.add(drawboard, BorderLayout.CENTER);
         m_eventHandler = new CMServerEventHandler(m_serverStub,drawboard);
 
+        this.setVisible(true);
     }
     public CMServerStub getServerStub()
     {
@@ -40,7 +49,4 @@ public class CMServerApp  {
         cmStub.setAppEventHandler(server.getServerEventHandler());
         cmStub.startCM();
     }
-
-
-
 }

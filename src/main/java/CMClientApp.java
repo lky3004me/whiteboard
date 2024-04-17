@@ -20,18 +20,27 @@ import java.util.Vector;
 //클라이언트 메인
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-public class CMClientApp implements MouseListener,MouseMotionListener{
+public class CMClientApp extends JFrame implements MouseListener,MouseMotionListener{
     private static CMClientStub m_clientStub;
     private CMClientEventHandler m_eventHandler;
-
     private DrawInfo.DrawFrame drawboard;
+    public TopMenu menu;
 
 
     public CMClientApp()
     {
+        super("클라이언트");
+        this.setSize(500,600);
         m_clientStub = new CMClientStub();
+        setLocationRelativeTo(null);
+        BorderLayout border = new BorderLayout();
+        this.setLayout(border);
         drawboard = new DrawInfo.DrawFrame(m_clientStub);
+        menu = new TopMenu(m_clientStub,drawboard);
+        this.add(menu, BorderLayout.NORTH);
+        this.add(drawboard, BorderLayout.CENTER);
         m_eventHandler = new CMClientEventHandler(m_clientStub,drawboard);
+        this.setVisible(true);
     }
     public CMClientStub getClientStub()
     {
@@ -123,15 +132,15 @@ public class CMClientApp implements MouseListener,MouseMotionListener{
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        Vector vc = drawboard.getVc();
-
-        for (int i = 0; i<vc.size();i++){
-            String strInput = vc.toString();
-            CMDummyEvent due = new CMDummyEvent();
-            System.out.println(strInput);
-            due.setDummyInfo(strInput);
-            m_clientStub.send(due, m_clientStub.getDefaultServerName());
-        }
+//        Vector vc = drawboard.getVc();
+//
+//        for (int i = 0; i<vc.size();i++){
+//            String strInput = vc.toString();
+//            CMDummyEvent due = new CMDummyEvent();
+//            System.out.println(strInput);
+//            due.setDummyInfo(strInput);
+//            m_clientStub.send(due, m_clientStub.getDefaultServerName());
+//        }
     }
 
     @Override
