@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+
 public class TopMenu extends JPanel implements ActionListener {
 
     public JButton exitBtn = new JButton("나가기");
@@ -14,11 +15,16 @@ public class TopMenu extends JPanel implements ActionListener {
     public JButton recBtn = new JButton("사각형");
     public JButton textBtn = new JButton("텍스트");
     public JButton changeBtn = new JButton("수정하기");
+    public JButton colorBtn = new JButton("색깔 선택");
     public JPanel btnPanel = new JPanel();
+    public JPanel colorPalette = new JPanel();
     public CMClientStub m_clientStub = null;
     public CMServerStub m_serverStub = null;
     private  boolean isClient;
     private DrawInfo.DrawFrame drawboard;
+
+    JColorChooser chooser = new JColorChooser();
+
     public TopMenu(CMClientStub m_clientStub, DrawInfo.DrawFrame drawboard){
         this.m_clientStub = m_clientStub;
         this.drawboard = drawboard;
@@ -43,6 +49,10 @@ public class TopMenu extends JPanel implements ActionListener {
 
         recBtn.addActionListener(this);
         btnPanel.add(recBtn);
+
+        colorBtn.addActionListener(this);
+        btnPanel.add(colorBtn);
+
         add(btnPanel);
         setBackground(Color.WHITE);
         setVisible(true);
@@ -61,12 +71,14 @@ public class TopMenu extends JPanel implements ActionListener {
         exitBtn.addActionListener(this);
         btnPanel.add(exitBtn);
         add(btnPanel);
+
         setBackground(Color.WHITE);
         setVisible(true);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
         if (e.getSource() == exitBtn){
             //terminate를 제외하면 접속 해제를 알리는 기능이 존재
             //m_clientStub.leaveSession();
@@ -101,6 +113,12 @@ public class TopMenu extends JPanel implements ActionListener {
         }
         else if(e.getSource() == changeBtn){
             drawboard.setMode("change");
+        }else if(e.getSource() == colorBtn){
+            Color seletedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
+
+            if(seletedColor != null){
+                drawboard.setColor(seletedColor);
+            }
         }
     }
 }

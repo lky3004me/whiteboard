@@ -146,6 +146,9 @@ class DrawInfo {
             nowType = mode;
         }
 
+        //색깔 설정
+        public void setColor(Color c){ nowColor = c;}
+
         public Vector getVc(){
             return vc;
         }
