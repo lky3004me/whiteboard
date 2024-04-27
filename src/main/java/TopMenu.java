@@ -16,11 +16,15 @@ public class TopMenu extends JPanel implements ActionListener {
     public JButton textBtn = new JButton("텍스트");
     public JButton changeBtn = new JButton("수정하기");
     public JButton colorBtn = new JButton("색깔 선택");
+    public JButton thickBtn = new JButton("굵기:1");
+    public JButton fillBtn = new JButton("채우기");
+
     public JPanel btnPanel = new JPanel();
     public JPanel colorPalette = new JPanel();
     public CMClientStub m_clientStub = null;
     public CMServerStub m_serverStub = null;
     private  boolean isClient;
+    private int thickness = 1;
     private DrawInfo.DrawFrame drawboard;
 
     JColorChooser chooser = new JColorChooser();
@@ -29,10 +33,11 @@ public class TopMenu extends JPanel implements ActionListener {
         this.m_clientStub = m_clientStub;
         this.drawboard = drawboard;
         isClient=true;
-        this.setSize(500,100);
+        this.setSize(500,200);
+
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
-        add(new JLabel("메뉴"));
+        //add(new JLabel("메뉴"));
 
         //나가기 버튼
         //버튼에 이벤트 핸들러 등록, 상단에 버튼 추가
@@ -53,6 +58,12 @@ public class TopMenu extends JPanel implements ActionListener {
         colorBtn.addActionListener(this);
         btnPanel.add(colorBtn);
 
+        thickBtn.addActionListener(this);
+        btnPanel.add(thickBtn);
+
+        fillBtn.addActionListener(this);
+        btnPanel.add(fillBtn);
+
         add(btnPanel);
         setBackground(Color.WHITE);
         setVisible(true);
@@ -61,7 +72,7 @@ public class TopMenu extends JPanel implements ActionListener {
         this.m_serverStub = m_serverStub;
         this.drawboard = drawboard;
         isClient=false;
-        this.setSize(500,100);
+        this.setSize(500,200);
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
         add(new JLabel("메뉴"));
@@ -113,11 +124,30 @@ public class TopMenu extends JPanel implements ActionListener {
         }
         else if(e.getSource() == changeBtn){
             drawboard.setMode("change");
-        }else if(e.getSource() == colorBtn){
-            Color seletedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
+        }else if(e.getSource() == colorBtn) {
+            Color selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
 
-            if(seletedColor != null){
-                drawboard.setColor(seletedColor);
+            if (selectedColor != null) {
+                drawboard.setNowColor(selectedColor);
+            }
+        }else if (e.getSource() == thickBtn){
+            thickness *=2;
+
+            if(thickness == 64){
+                thickness = 1;
+            }
+
+            thickBtn.setText("굵기:"+ thickness);
+            drawboard.setNowThickness(thickness);
+        }else if(e.getSource() == fillBtn){
+            Color selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
+
+            if(selectedColor !=null){
+                if(drawboard.getMode().equals("cir") || drawboard.getMode().equals("rec")){
+                    drawboard.setNowColor(selectedColor);
+                    boolean tmp = drawboard.getNowFill();
+                    drawboard.setNowFill(!tmp);
+                }
             }
         }
     }

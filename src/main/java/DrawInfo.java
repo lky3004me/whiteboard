@@ -64,8 +64,8 @@ class DrawInfo {
         public Image Img_buffer;
         private String nowType = "pen";
         private Color nowColor = Color.black;
-        private Boolean nowFill = false;
-        private int nowThickness = 3; //선두께
+        private boolean nowFill = false;
+        private int nowThickness = 1; //선두께
         private boolean nowDrawing = false;
         private DrawInfo tmpinfo = null;
         private DrawInfo clearInfo = new DrawInfo("clear",0,0,0,0,0,0,0,false,0,false);
@@ -78,8 +78,6 @@ class DrawInfo {
             this.addMouseListener(this);
             this.addMouseMotionListener(this);
             this.setSize(500,500);
-
-
             //setLocationRelativeTo(null);
             this.setVisible(true);
         }
@@ -119,15 +117,28 @@ class DrawInfo {
                     ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
                     Graphics_buffer.drawLine(info.getX(), info.getY(), info.getX1(), info.getY1());
                 }
-                else if (info.type.equals("cir")) {
-                    Graphics_buffer.setColor(info.color);
-                    ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
-                    Graphics_buffer.drawOval(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+                else if (info.type.equals("cir")){
+                    if(info.fill){
+                        Graphics_buffer.setColor(info.color);
+                        ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
+                        Graphics_buffer.fillOval(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+
+                    }else{
+                        Graphics_buffer.setColor(info.color);
+                        ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
+                        Graphics_buffer.drawOval(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+                    }
                 }
                 else if (info.type.equals("rec")) {
-                    Graphics_buffer.setColor(info.color);
-                    ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
-                    Graphics_buffer.drawRect(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+                    if(info.fill){
+                        Graphics_buffer.setColor(info.color);
+                        ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
+                        Graphics_buffer.fillRect(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+                    }else{
+                        Graphics_buffer.setColor(info.color);
+                        ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
+                        Graphics_buffer.drawRect(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+                    }
                 }
                 else{
 
@@ -145,9 +156,16 @@ class DrawInfo {
         public void setMode(String mode){
             nowType = mode;
         }
-
+        public String getMode(){
+            return nowType;
+        }
+        public void setNowFill(boolean b){ nowFill = b; }
+        public boolean getNowFill(){ return nowFill; }
         //색깔 설정
-        public void setColor(Color c){ nowColor = c;}
+        public void setNowColor(Color c){ nowColor = c;}
+
+        //굵기 설정
+        public void setNowThickness(int t){nowThickness = t;}
 
         public Vector getVc(){
             return vc;
