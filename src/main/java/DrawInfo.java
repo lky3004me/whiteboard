@@ -271,9 +271,9 @@ class DrawInfo {
                         di = new DrawInfo(nowType, x, y1, x1, y,0, 0, 0, nowFill, 3, nowDrawing);
                     else
                         di = new DrawInfo(nowType, x1, y1, x, y,0, 0, 0, nowFill, 3, nowDrawing);
-                    sendDrawInfo(di);
-                    changeInfo = di;
 
+                    changeInfo = di;
+                    sendDrawInfo(changeInfo);
 
                     for (int h = 0; h < vc.size(); h++) {
                         DrawInfo chan = (DrawInfo) vc.elementAt(h);
@@ -379,11 +379,18 @@ class DrawInfo {
                     info.thickness = changeThickness;
                     info.fill = changeFill;
                     vc.set((int) chlist.get(j),info);
-                    //info.type="chan";
-                    //info.textcontent =  Integer.toString((int)chlist.get(j));
-                    sendDrawInfo(info);
+
+                    //sendDrawInfo(info);
                 }
             }
+            changeInfo.type="chan";
+            changeInfo.color_R = changeColor.getRed();
+            changeInfo.color_G = changeColor.getGreen();
+            changeInfo.color_B = changeColor.getBlue();
+            changeInfo.color = changeColor;
+            changeInfo.thickness = changeThickness;
+            changeInfo.fill = changeFill;
+            sendDrawInfo(changeInfo);
             this.repaint();
         }
 
@@ -400,7 +407,7 @@ class DrawInfo {
 //                due.setHandlerGroup(myself.getCurrentGroup());
                 m_clientStub.cast(due, null,null);
                 //m_clientStub.broadcast(due);
-                if(!info.type.equals("clear"))
+                if(!info.type.equals("clear")&&!info.type.equals("chan"))
                     vc.add(info);
             }
         }
@@ -411,8 +418,27 @@ class DrawInfo {
             if(strDrawInfo.type.equals("text")){
                 strDrawInfo.textcontent = strArr[11];
             }
-            /*
+
             if(strDrawInfo.type.equals("chan")){
+                for (int h = 0; h < vc.size(); h++) {
+                    DrawInfo chan = (DrawInfo) vc.elementAt(h);
+                    if (!chan.type.equals("change")&&!chan.type.equals("clear")) {
+                        if (min(strDrawInfo.getX(),strDrawInfo.getX1())<min(chan.getX(),chan.getX1()) && max(strDrawInfo.getX(),strDrawInfo.getX1()) > max(chan.getX(),chan.getX1()) ) {
+                            if(min(strDrawInfo.getY(),strDrawInfo.getY1())<min(chan.getY(),chan.getY1()) && max(strDrawInfo.getY(),strDrawInfo.getY1()) > max(chan.getY(),chan.getY1())){
+                                DrawInfo info = chan;
+                                info.color_R = strDrawInfo.color_R;
+                                info.color_G = strDrawInfo.color_G;
+                                info.color_B = strDrawInfo.color_B;
+                                info.color = new Color(info.color_R,info.color_G,info.color_B);
+                                info.thickness = strDrawInfo.thickness;
+                                info.fill = strDrawInfo.fill;
+                                vc.set(h,info);
+                            }
+                        }
+                    }
+                }
+
+            /*
                 strDrawInfo.textcontent = strArr[11];
                 DrawInfo info = (DrawInfo) vc.elementAt(Integer.parseInt(strDrawInfo.textcontent));
                 info.color_R = strDrawInfo.color_R;
@@ -422,7 +448,10 @@ class DrawInfo {
                 info.thickness = changeThickness;
                 info.fill = changeFill;
                 vc.set(Integer.parseInt(strDrawInfo.textcontent), info);
-            }*/
+
+             */
+            }
+
             if(strDrawInfo.type.equals("clear")){
                 vc.clear();
                 vc.add(clearInfo);
