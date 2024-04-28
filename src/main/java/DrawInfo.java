@@ -133,6 +133,7 @@ class DrawInfo {
                         Graphics_buffer.setColor(info.color);
                         ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
                         Graphics_buffer.fillOval(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+                        Graphics_buffer.drawOval(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
 
                     }else{
                         Graphics_buffer.setColor(info.color);
@@ -145,6 +146,7 @@ class DrawInfo {
                         Graphics_buffer.setColor(info.color);
                         ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
                         Graphics_buffer.fillRect(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+                        Graphics_buffer.drawRect(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
                     }else{
                         Graphics_buffer.setColor(info.color);
                         ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
@@ -432,7 +434,7 @@ class DrawInfo {
                                 info.color = new Color(info.color_R,info.color_G,info.color_B);
                                 info.thickness = strDrawInfo.thickness;
                                 info.fill = strDrawInfo.fill;
-                                vc.set(h,info);
+                                vc.set(h, info);
                             }
                         }
                     }
@@ -460,10 +462,10 @@ class DrawInfo {
             }
             vc.add(strDrawInfo);
             if(!isClient){
-                CMDummyEvent due = new CMDummyEvent();
-                CMInteractionInfo interInfo = m_serverStub.getCMInfo().getInteractionInfo();
-                CMUser myself = interInfo.getMyself();
-                due.setDummyInfo(str);
+                //CMDummyEvent due = new CMDummyEvent();
+                //CMInteractionInfo interInfo = m_serverStub.getCMInfo().getInteractionInfo();
+                //CMUser myself = interInfo.getMyself();
+                //due.setDummyInfo(str);
                 //m_serverStub.broadcast(due);
                 //m_serverStub.send(due, "ccslab");
                 //due.setHandlerSession(myself.getCurrentSession());

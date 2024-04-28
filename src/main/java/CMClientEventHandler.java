@@ -57,9 +57,17 @@ public class CMClientEventHandler implements CMAppEventHandler {
                 if(de.getID() == CMDataEvent.REMOVE_USER){
                     String removedUser = de.getUserName();
                     //이제 이걸 다른 사용자들에게 전달
-                    System.out.println(removedUser + "님이 나갔습니다.");
+                    System.out.println("[SYSTEM] "+removedUser + "님이 나갔습니다.");
                 }
-
+                if(de.getID() == CMDataEvent.NEW_USER){
+                    String removedUser = de.getUserName();
+                    //이제 이걸 다른 사용자들에게 전달
+                    System.out.println("[SYSTEM] "+removedUser + "님이 들어오셨습니다.");
+                }
+                break;
+            case CMInfo.CM_SESSION_EVENT:
+                processSessionEvent(cme);
+                break;
             case CMInfo.CM_DUMMY_EVENT:
                 processDummyEvent(cme);
                 break;
@@ -70,8 +78,13 @@ public class CMClientEventHandler implements CMAppEventHandler {
     private void processDummyEvent(CMEvent cme)
     {
         CMDummyEvent due = (CMDummyEvent) cme;
-        System.out.println("dummy msg: "+due.getDummyInfo());
-        m_drawboard.receiveDrawInfo(due.getDummyInfo());
+        String[] strArr = due.getDummyInfo().split("#");
+
+        if(strArr[0].equals("[system]")){
+            System.out.println(strArr[0]+" "+strArr[1]);
+        }else{
+            m_drawboard.receiveDrawInfo(due.getDummyInfo());
+        }
         return;
     }
 

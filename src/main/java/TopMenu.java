@@ -1,3 +1,4 @@
+import kr.ac.konkuk.ccslab.cm.event.CMDummyEvent;
 import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
 import kr.ac.konkuk.ccslab.cm.stub.CMServerStub;
 
@@ -104,11 +105,14 @@ public class TopMenu extends JPanel implements ActionListener {
             //나갔는지의 상태는 99p CMInfo.CM_login
             //server와 client 둘만 있을 때, server와 client 누가 눌렀는지 식별함
             if(isClient && m_clientStub != null){
+                //CMDummyEvent due = new CMDummyEvent();
+                //due.setDummyInfo("[system]#["+se.getUserName()+"] 님이 세션에 입장하였습니다.");
+                //m_clientStub.cast()
                 m_clientStub.leaveSession();
                 m_clientStub.logoutCM();
                 m_clientStub.terminateCM();
             }
-            else if(!isClient && m_clientStub != null){
+            else if(!isClient && m_serverStub != null){
                 m_serverStub.terminateCM();
             }
             System.exit(0);
