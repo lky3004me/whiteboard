@@ -390,7 +390,11 @@ class DrawInfo {
                 //System.out.println(strInput);
                 due.setDummyInfo(strInput);
                 //m_clientStub.send(due, m_clientStub.getDefaultServerName());
-                m_clientStub.cast(due, null,null);
+                CMInteractionInfo interInfo = m_clientStub.getCMInfo().getInteractionInfo();
+                CMUser myself = interInfo.getMyself();
+                due.setHandlerSession(myself.getCurrentSession());
+                due.setHandlerGroup(myself.getCurrentGroup());
+                m_clientStub.cast(due, myself.getCurrentSession(),myself.getCurrentGroup());
                 //m_clientStub.broadcast(due);
                 if(!info.type.equals("clear"))
                     vc.add(info);
