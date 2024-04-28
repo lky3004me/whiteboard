@@ -34,7 +34,7 @@ public class TopMenu extends JPanel implements ActionListener {
         this.m_clientStub = m_clientStub;
         this.drawboard = drawboard;
         isClient=true;
-        this.setSize(500,200);
+        this.setSize(800,200);
 
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
@@ -79,7 +79,7 @@ public class TopMenu extends JPanel implements ActionListener {
         this.m_serverStub = m_serverStub;
         this.drawboard = drawboard;
         isClient=false;
-        this.setSize(700,200);
+        this.setSize(800,200);
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
         add(new JLabel("메뉴"));

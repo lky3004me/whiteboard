@@ -22,7 +22,7 @@ public class CMServerApp extends JFrame{
     public CMServerApp()
     {
         super("서버");
-        this.setSize(800,600);
+        this.setSize(800,700);
         m_serverStub = new CMServerStub();
         setLocationRelativeTo(null);
         BorderLayout border = new BorderLayout();

@@ -26,20 +26,24 @@ public class CMClientApp extends JFrame implements MouseListener,MouseMotionList
     private DrawInfo.DrawFrame drawboard;
     public TopMenu menu;
 
+    public BottomLog bottomLog;
 
     public CMClientApp()
     {
         super("클라이언트");
-        this.setSize(800,600);
+        this.setSize(800,800);
         m_clientStub = new CMClientStub();
         setLocationRelativeTo(null);
         BorderLayout border = new BorderLayout();
         this.setLayout(border);
         drawboard = new DrawInfo.DrawFrame(m_clientStub);
         menu = new TopMenu(m_clientStub,drawboard);
+        bottomLog = new BottomLog();
+        m_eventHandler = new CMClientEventHandler(m_clientStub,drawboard,bottomLog);
         this.add(menu, BorderLayout.NORTH);
         this.add(drawboard, BorderLayout.CENTER);
-        m_eventHandler = new CMClientEventHandler(m_clientStub,drawboard);
+        this.add(bottomLog, BorderLayout.SOUTH);
+
         this.setVisible(true);
     }
     public CMClientStub getClientStub()
