@@ -17,7 +17,7 @@ public class TopMenu extends JPanel implements ActionListener {
     public JButton changeBtn = new JButton("수정하기");
     public JButton colorBtn = new JButton("색깔 선택");
     public JButton thickBtn = new JButton("굵기:1");
-    public JButton fillBtn = new JButton("채우기");
+    public JButton fillBtn = new JButton("채우기 ○");
 
     public JPanel btnPanel = new JPanel();
     public JPanel colorPalette = new JPanel();
@@ -37,7 +37,7 @@ public class TopMenu extends JPanel implements ActionListener {
 
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
-        //add(new JLabel("메뉴"));
+        add(new JLabel("메뉴"));
 
         //나가기 버튼
         //버튼에 이벤트 핸들러 등록, 상단에 버튼 추가
@@ -55,6 +55,9 @@ public class TopMenu extends JPanel implements ActionListener {
         recBtn.addActionListener(this);
         btnPanel.add(recBtn);
 
+        textBtn.addActionListener(this);
+        btnPanel.add(textBtn);
+
         colorBtn.addActionListener(this);
         btnPanel.add(colorBtn);
 
@@ -64,6 +67,9 @@ public class TopMenu extends JPanel implements ActionListener {
         fillBtn.addActionListener(this);
         btnPanel.add(fillBtn);
 
+        changeBtn.addActionListener(this);
+        btnPanel.add(changeBtn);
+
         add(btnPanel);
         setBackground(Color.WHITE);
         setVisible(true);
@@ -72,7 +78,7 @@ public class TopMenu extends JPanel implements ActionListener {
         this.m_serverStub = m_serverStub;
         this.drawboard = drawboard;
         isClient=false;
-        this.setSize(500,200);
+        this.setSize(700,200);
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
         add(new JLabel("메뉴"));
@@ -121,34 +127,70 @@ public class TopMenu extends JPanel implements ActionListener {
         }
         else if(e.getSource() == textBtn){
             drawboard.setMode("text");
+            String text = JOptionPane.showInputDialog("텍스트를 입력하세요");
+            drawboard.setTextcontent(text);
         }
         else if(e.getSource() == changeBtn){
             drawboard.setMode("change");
         }else if(e.getSource() == colorBtn) {
-            Color selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
+            if(drawboard.getMode().equals("change")){
+                Color selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
 
-            if (selectedColor != null) {
-                drawboard.setNowColor(selectedColor);
+                if (selectedColor != null) {
+                    drawboard.setChangeColor(selectedColor);
+                    drawboard.setNowColor(selectedColor);
+                }
+                drawboard.changeDrawInfo();
             }
-        }else if (e.getSource() == thickBtn){
-            thickness *=2;
+            else{
+                Color selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
 
-            if(thickness == 64){
+                if (selectedColor != null) {
+                    drawboard.setNowColor(selectedColor);
+                }
+            }
+
+        }else if (e.getSource() == thickBtn){
+            thickness *= 2;
+
+            if (thickness == 64) {
                 thickness = 1;
             }
 
-            thickBtn.setText("굵기:"+ thickness);
-            drawboard.setNowThickness(thickness);
+            thickBtn.setText("굵기:" + thickness);
+            if(drawboard.getMode().equals("change")) {
+                drawboard.setChangeThickness(thickness);
+                drawboard.setNowThickness(thickness);
+                drawboard.changeDrawInfo();
+            }
+            else {
+                drawboard.setNowThickness(thickness);
+            }
         }else if(e.getSource() == fillBtn){
-            Color selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
-
-            if(selectedColor !=null){
+            Color selectedColor = drawboard.getNowColor();
+            if(fillBtn.getText().equals("채우기 ○")) {
+                fillBtn.setText("채우기 ●");
+                //selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
                 if(drawboard.getMode().equals("cir") || drawboard.getMode().equals("rec")){
                     drawboard.setNowColor(selectedColor);
-                    boolean tmp = drawboard.getNowFill();
-                    drawboard.setNowFill(!tmp);
                 }
             }
+            else{
+                fillBtn.setText("채우기 ○");
+                if(drawboard.getMode().equals("cir") || drawboard.getMode().equals("rec")){
+                    drawboard.setNowColor(selectedColor);
+                }
+            }
+            boolean tmp = drawboard.getNowFill();
+
+            if(drawboard.getMode().equals("change")){
+                drawboard.setChangeFill(!tmp);
+                drawboard.setNowFill(!tmp);
+                drawboard.changeDrawInfo();
+            }else{
+                drawboard.setNowFill(!tmp);
+            }
+
         }
     }
 }

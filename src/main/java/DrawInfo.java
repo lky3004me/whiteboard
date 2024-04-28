@@ -1,7 +1,9 @@
+import kr.ac.konkuk.ccslab.cm.entity.CMUser;
 import kr.ac.konkuk.ccslab.cm.event.CMDummyEvent;
 import kr.ac.konkuk.ccslab.cm.event.CMEvent;
 import kr.ac.konkuk.ccslab.cm.event.CMSessionEvent;
 import kr.ac.konkuk.ccslab.cm.info.CMConfigurationInfo;
+import kr.ac.konkuk.ccslab.cm.info.CMInteractionInfo;
 import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
 import kr.ac.konkuk.ccslab.cm.stub.CMServerStub;
 
@@ -11,7 +13,7 @@ import java.awt.event.*;
 import java.util.Arrays;
 import java.util.Vector;
 
-import static java.lang.Math.abs;
+import static java.lang.Math.*;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //그림 정보 클래스
@@ -68,6 +70,13 @@ class DrawInfo {
         private int nowThickness = 1; //선두께
         private boolean nowDrawing = false;
         private DrawInfo tmpinfo = null;
+        public DrawInfo changeInfo = null;
+        private Color changeColor = Color.black;
+        private boolean changeFill = false;
+        private int changeThickness = 1; //선두께
+
+        private String textcontent = "";
+        Vector chlist = new Vector();
         private DrawInfo clearInfo = new DrawInfo("clear",0,0,0,0,0,0,0,false,0,false);
 
         public DrawFrame(CMClientStub m_clientStub){
@@ -77,7 +86,7 @@ class DrawInfo {
             vc.add(clearInfo);
             this.addMouseListener(this);
             this.addMouseMotionListener(this);
-            this.setSize(500,500);
+            this.setSize(800,500);
             //setLocationRelativeTo(null);
             this.setVisible(true);
         }
@@ -88,7 +97,7 @@ class DrawInfo {
             vc.add(clearInfo);
             this.addMouseListener(this);
             this.addMouseMotionListener(this);
-            this.setSize(500,500);
+            this.setSize(800,500);
 
 
             //setLocationRelativeTo(null);
@@ -104,7 +113,7 @@ class DrawInfo {
         //@Override
         public void update(Graphics g){
             //벡터에 저장된 그림 전부 그림
-            Graphics_buffer.clearRect(0, 0, 500, 500); // 백지화
+            Graphics_buffer.clearRect(0, 0, 800, 500); // 백지화
             for (int i = 0; i < vc.size(); i++) {
                 DrawInfo info = (DrawInfo) vc.elementAt(i);
                 if (info.type.equals("pen")) {
@@ -140,6 +149,18 @@ class DrawInfo {
                         Graphics_buffer.drawRect(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
                     }
                 }
+                else if (info.type.equals("change")) {
+                    float[] dash = new float[]{5,5,5,5};
+                    Graphics_buffer.setColor(info.color);
+                    ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, 0, 0, 1.0f, dash, 0));
+                    Graphics_buffer.drawRect(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+
+                }
+                else if (info.type.equals("text")) {
+                    Graphics_buffer.setColor(info.color);
+                    Graphics_buffer.drawString(textcontent,info.getX1(), info.getY1());
+
+                }
                 else{
 
                 }
@@ -163,9 +184,21 @@ class DrawInfo {
         public boolean getNowFill(){ return nowFill; }
         //색깔 설정
         public void setNowColor(Color c){ nowColor = c;}
+        public Color getNowColor(){ return nowColor;}
 
         //굵기 설정
         public void setNowThickness(int t){nowThickness = t;}
+
+        public void setChangeFill(boolean b){ changeFill = b; }
+        public boolean getChangeFill(){ return changeFill; }
+        //색깔 설정
+        public void setChangeColor(Color c){ changeColor = c;}
+        public Color getChangeColor(){ return changeColor;}
+
+        //굵기 설정
+        public void setChangeThickness(int t){changeThickness = t;}
+
+        public void setTextcontent(String t){textcontent = t;}
 
         public Vector getVc(){
             return vc;
@@ -194,6 +227,7 @@ class DrawInfo {
                 x = e.getX();
                 y = e.getY();
             }
+            chlist.clear();
         }
 
         @Override
@@ -227,6 +261,45 @@ class DrawInfo {
                         di = new DrawInfo(nowType, x1, y1, x, y,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
                     sendDrawInfo(di);
                 }
+                if(nowType.equals("change")){
+                    nowDrawing = true;
+                    if(x<x1&&y<y1)
+                        di = new DrawInfo(nowType, x, y, x1, y1,0, 0, 0, nowFill, 3, nowDrawing);
+                    else if (x>x1&&y<y1)
+                        di = new DrawInfo(nowType, x1, y, x, y1,0, 0, 0, nowFill, 3, nowDrawing);
+                    else if (x<x1&&y>y1)
+                        di = new DrawInfo(nowType, x, y1, x1, y,0, 0, 0, nowFill, 3, nowDrawing);
+                    else
+                        di = new DrawInfo(nowType, x1, y1, x, y,0, 0, 0, nowFill, 3, nowDrawing);
+                    sendDrawInfo(di);
+                    changeInfo = di;
+
+
+                    for (int h = 0; h < vc.size(); h++) {
+                        DrawInfo chan = (DrawInfo) vc.elementAt(h);
+                        if (!chan.type.equals("change")&&!chan.type.equals("clear")) {
+                            /*if (Math.abs(di.getX() - chan.getX()) + (chan.getX1() - chan.getX()) / 2 <= (di.getX1() - di.getX()) / 2 && Math.abs(di.getY() - chan.getY()) + (chan.getY1() - chan.getY()) / 2 <= (di.getY1() - di.getY()) / 2) {
+                                chlist.add(h);
+                            }*/
+                            if (min(di.getX(),di.getX1())<min(chan.getX(),chan.getX1()) && max(di.getX(),di.getX1()) > max(chan.getX(),chan.getX1()) ) {
+                                if(min(di.getY(),di.getY1())<min(chan.getY(),chan.getY1()) && max(di.getY(),di.getY1()) > max(chan.getY(),chan.getY1())){
+                                    chlist.add(h);
+                                }
+                            }
+                        }
+                    }
+                    /*
+                    for(int k = 0; k<chlist.size();k++){
+                        System.out.print(chlist.get(k)+ " ");
+                    }
+                    System.out.println();
+                    */
+                }
+                if(nowType.equals("text")) {
+                    nowDrawing = false;
+                    di = new DrawInfo(nowType, x, y, x1, y1,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
+                }
+                //System.out.println(vc.size());
                 this.repaint();
 
             }
@@ -273,6 +346,18 @@ class DrawInfo {
                         di = new DrawInfo(nowType, x1, y1, x, y,nowColor.getRed(), nowColor.getGreen(), nowColor.getBlue(), nowFill, nowThickness, nowDrawing);
                     sendDrawInfo(di);
                 }
+                if(nowType.equals("change")){
+                    nowDrawing = true;
+                    if(x<x1&&y<y1)
+                        di = new DrawInfo(nowType, x, y, x1, y1,0, 0, 0, nowFill, 3, nowDrawing);
+                    else if (x>x1&&y<y1)
+                        di = new DrawInfo(nowType, x1, y, x, y1,0, 0, 0, nowFill, 3, nowDrawing);
+                    else if (x<x1&&y>y1)
+                        di = new DrawInfo(nowType, x, y1, x1, y,0, 0, 0, nowFill, 3, nowDrawing);
+                    else
+                        di = new DrawInfo(nowType, x1, y1, x, y,0, 0, 0, nowFill, 3, nowDrawing);
+                    sendDrawInfo(di);
+                }
                 this.repaint();
             }
         }
@@ -281,15 +366,34 @@ class DrawInfo {
         public void mouseMoved(MouseEvent e) {
 
         }
-
+        public void changeDrawInfo(){
+            if(!chlist.isEmpty()) {
+                for (int j = 0; j < chlist.size(); j++) {
+                    DrawInfo info = (DrawInfo) vc.elementAt((int) chlist.get(j));
+                    info.color_R = changeColor.getRed();
+                    info.color_G = changeColor.getGreen();
+                    info.color_B = changeColor.getBlue();
+                    info.color = changeColor;
+                    info.thickness = changeThickness;
+                    info.fill = changeFill;
+                    vc.set((int) chlist.get(j),info);
+                    sendDrawInfo(info);
+                }
+            }
+            this.repaint();
+        }
 
         public void sendDrawInfo(DrawInfo info){
             if(isClient){
                 String strInput = info.getInfo();
                 CMDummyEvent due = new CMDummyEvent();
-                System.out.println(strInput);
+                //System.out.println(strInput);
                 due.setDummyInfo(strInput);
-                m_clientStub.send(due, m_clientStub.getDefaultServerName());
+                //m_clientStub.send(due, m_clientStub.getDefaultServerName());
+                m_clientStub.cast(due, null,null);
+                //m_clientStub.broadcast(due);
+                if(!info.type.equals("clear"))
+                    vc.add(info);
             }
         }
         public void receiveDrawInfo(String str){
@@ -298,12 +402,22 @@ class DrawInfo {
                     Integer.parseInt(strArr[5]),Integer.parseInt(strArr[6]),Integer.parseInt(strArr[7]),Boolean.parseBoolean(strArr[8]),Integer.parseInt(strArr[9]),Boolean.parseBoolean(strArr[10]));
             if(strDrawInfo.type.equals("clear")){
                 vc.clear();
+                this.repaint();
+                return;
             }
             vc.add(strDrawInfo);
             if(!isClient){
                 CMDummyEvent due = new CMDummyEvent();
+                CMInteractionInfo interInfo = m_serverStub.getCMInfo().getInteractionInfo();
+                CMUser myself = interInfo.getMyself();
                 due.setDummyInfo(str);
-                //m_serverStub.cast(due, se.getSessionName(),se.getCurrentGroupName());
+                //m_serverStub.broadcast(due);
+                //m_serverStub.send(due, "ccslab");
+                //due.setHandlerSession(myself.getCurrentSession());
+                //due.setHandlerGroup(myself.getCurrentGroup());
+                //System.out.println(str);
+                //m_serverStub.cast(due,null,null);
+                //m_serverStub.cast(due, myself.getCurrentSession(),myself.getCurrentGroup());
             }
             this.repaint();
         }

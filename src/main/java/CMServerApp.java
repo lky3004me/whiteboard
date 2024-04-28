@@ -22,7 +22,7 @@ public class CMServerApp extends JFrame{
     public CMServerApp()
     {
         super("서버");
-        this.setSize(500,600);
+        this.setSize(800,600);
         m_serverStub = new CMServerStub();
         setLocationRelativeTo(null);
         BorderLayout border = new BorderLayout();
@@ -32,7 +32,6 @@ public class CMServerApp extends JFrame{
         this.add(menu, BorderLayout.NORTH);
         this.add(drawboard, BorderLayout.CENTER);
         m_eventHandler = new CMServerEventHandler(m_serverStub,drawboard);
-
         this.setVisible(true);
     }
     public CMServerStub getServerStub()

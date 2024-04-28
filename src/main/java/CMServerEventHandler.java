@@ -8,12 +8,18 @@ import kr.ac.konkuk.ccslab.cm.info.CMConfigurationInfo;
 import kr.ac.konkuk.ccslab.cm.info.CMInfo;
 import kr.ac.konkuk.ccslab.cm.manager.CMDBManager;
 import kr.ac.konkuk.ccslab.cm.stub.CMServerStub;
+
+import java.util.Vector;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //서버 이벤트 핸들러
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 public class CMServerEventHandler implements CMAppEventHandler {
     private CMServerStub m_serverStub;
     public DrawInfo.DrawFrame m_drawboard;
+
+    //클라이언트 유저 목록
+    private Vector<String> userlist = new Vector();
     public CMServerEventHandler(CMServerStub serverStub, DrawInfo.DrawFrame drawboard)
     {
         m_serverStub = serverStub;
@@ -39,7 +45,7 @@ public class CMServerEventHandler implements CMAppEventHandler {
         {
             case CMSessionEvent.LOGIN:
                 System.out.println("["+se.getUserName()+"] requests login.");
-                m_drawboard.addVc();
+                userlist.add(se.getUserName());
                 break;
             default:
                 return;
