@@ -8,7 +8,7 @@ public class BottomLog  extends JPanel {
     JScrollPane scrollPane = new JScrollPane(textArea);
     public BottomLog() {
         this.setSize(800, 100);
-        textArea = new JTextArea(3,50);
+        textArea = new JTextArea(2,50);
         textArea.setLineWrap(true);
         scrollPane = new JScrollPane(textArea);
         this.add(scrollPane);
