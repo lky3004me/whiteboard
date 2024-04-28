@@ -68,6 +68,8 @@ class DrawInfo {
         private int nowThickness = 1; //선두께
         private boolean nowDrawing = false;
         private DrawInfo tmpinfo = null;
+        private boolean correctState = false;
+
         private DrawInfo clearInfo = new DrawInfo("clear",0,0,0,0,0,0,0,false,0,false);
 
         public DrawFrame(CMClientStub m_clientStub){
@@ -166,6 +168,98 @@ class DrawInfo {
 
         //굵기 설정
         public void setNowThickness(int t){nowThickness = t;}
+
+        //vc의 특정 좌표 수정
+        public void setVc(int[] target, String mode){
+            if(mode.equals("color")){
+
+            }else if(mode.equals("thickness")){
+
+            }else if(mode.equals("fill")){
+
+            }
+        }
+
+        public int[] getXY(){
+            int[] arrXY = {x, y};
+
+            return arrXY;
+        }
+        public boolean getCorrectState(){
+            return correctState;
+        }
+        public void setCorrectState(boolean b){
+            correctState = b;
+        }
+
+        public Vector<Integer> findTarget(int[] xy){
+            int x = xy[0];
+            int y = xy[1];
+            Vector<Integer> result = new Vector<Integer>();
+            for (int i = 0; i < vc.size(); i++) {
+                DrawInfo info = (DrawInfo) vc.elementAt(i);
+
+                int sx = info.x;
+                int sy = info.y;
+                int ex = info.x1;
+                int ey = info.y1;
+
+                if(sx <= x && x <= ex && sy <= y && y <= ey){
+                    result.add(i);
+
+                }
+            }
+            return result;
+        }
+
+        //TopMenu용 함수. target에 들어있는 것은 목표 idx.
+        public void correctColor(Vector<Integer> target, Color selectedColor){
+            for (int i = 0; i < target.size(); i++) {
+                int idx = target.get(i);
+
+                // vc의 idx번째 요소 가져오기
+                DrawInfo tmp = (DrawInfo) vc.get(idx);
+
+                // color 수정
+                tmp.color = selectedColor;
+
+                // 벡터에 수정된 요소 다시 설정
+                vc.set(idx, tmp);
+            }
+        }
+
+        public void correctThick(Vector<Integer> target, int thickness){
+            for (int i = 0; i < target.size(); i++) {
+                int idx = target.get(i);
+
+                // vc의 idx번째 요소 가져오기
+                DrawInfo tmp = (DrawInfo) vc.get(idx);
+
+                // color 수정
+                tmp.thickness = thickness;
+
+                // 벡터에 수정된 요소 다시 설정
+                vc.set(idx, tmp);
+            }
+        }
+
+        public void correctFill(Vector<Integer> target, Color selectedColor){
+            for (int i = 0; i < target.size(); i++) {
+                int idx = target.get(i);
+
+                // vc의 idx번째 요소 가져오기
+                DrawInfo tmp = (DrawInfo) vc.get(idx);
+
+                // color 수정
+                //false일 경우 true가 되므로, 그때 반응
+                if(!(tmp.fill)){
+                    tmp.color = selectedColor;
+                }
+                tmp.fill = !(tmp.fill);
+                // 벡터에 수정된 요소 다시 설정
+                vc.set(idx, tmp);
+            }
+        }
 
         public Vector getVc(){
             return vc;

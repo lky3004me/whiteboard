@@ -4,6 +4,7 @@ import kr.ac.konkuk.ccslab.cm.stub.CMServerStub;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Vector;
 
 
 public class TopMenu extends JPanel implements ActionListener {
@@ -18,6 +19,7 @@ public class TopMenu extends JPanel implements ActionListener {
     public JButton colorBtn = new JButton("색깔 선택");
     public JButton thickBtn = new JButton("굵기:1");
     public JButton fillBtn = new JButton("채우기");
+    public JButton correctBtn = new JButton("수정");
 
     public JPanel btnPanel = new JPanel();
     public JPanel colorPalette = new JPanel();
@@ -64,6 +66,9 @@ public class TopMenu extends JPanel implements ActionListener {
         fillBtn.addActionListener(this);
         btnPanel.add(fillBtn);
 
+        correctBtn.addActionListener(this);
+        btnPanel.add(correctBtn);
+
         add(btnPanel);
         setBackground(Color.WHITE);
         setVisible(true);
@@ -89,6 +94,9 @@ public class TopMenu extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        int nowX, nowY;
+        nowX = drawboard.getX();
+        nowY = drawboard.getY();
 
         if (e.getSource() == exitBtn){
             //terminate를 제외하면 접속 해제를 알리는 기능이 존재
@@ -127,8 +135,14 @@ public class TopMenu extends JPanel implements ActionListener {
         }else if(e.getSource() == colorBtn) {
             Color selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
 
-            if (selectedColor != null) {
-                drawboard.setNowColor(selectedColor);
+            if(drawboard.getCorrectState()){
+                int[] xy = drawboard.getXY();
+                Vector<Integer> target = drawboard.findTarget(xy);
+                drawboard.correctColor(target, selectedColor);
+            }else{
+                if (selectedColor != null) {
+                    drawboard.setNowColor(selectedColor);
+                }
             }
         }else if (e.getSource() == thickBtn){
             thickness *=2;
@@ -137,18 +151,40 @@ public class TopMenu extends JPanel implements ActionListener {
                 thickness = 1;
             }
 
-            thickBtn.setText("굵기:"+ thickness);
-            drawboard.setNowThickness(thickness);
+            if(drawboard.getCorrectState()){
+                int[] xy = drawboard.getXY();
+                Vector<Integer> target = drawboard.findTarget(xy);
+                drawboard.correctThick(target, thickness);
+                thickBtn.setText("굵기:"+ thickness);
+            }else{
+                thickBtn.setText("굵기:"+ thickness);
+                drawboard.setNowThickness(thickness);
+            }
         }else if(e.getSource() == fillBtn){
             Color selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
 
-            if(selectedColor !=null){
-                if(drawboard.getMode().equals("cir") || drawboard.getMode().equals("rec")){
-                    drawboard.setNowColor(selectedColor);
-                    boolean tmp = drawboard.getNowFill();
-                    drawboard.setNowFill(!tmp);
+            if(selectedColor !=null) {
+                if(drawboard.getCorrectState()){
+                    int[] xy = drawboard.getXY();
+                    Vector<Integer> target = drawboard.findTarget(xy);
+                    drawboard.correctFill(target, selectedColor);
+                }else{
+                    if(drawboard.getMode().equals("cir") || drawboard.getMode().equals("rec")){
+                        drawboard.setNowColor(selectedColor);
+                        boolean tmp = drawboard.getNowFill();
+                        drawboard.setNowFill(!tmp);
+                    }
                 }
             }
+        }else if(e.getSource() == correctBtn){
+            drawboard.setCorrectState(!(drawboard.getCorrectState()));
         }
     }
+
+
 }
+
+//nowDrawing이 fasle이면 완성된 좌표. 이 안에 시작점과 끝점이 존재.
+//현재 클릭 위치에서, 위의 시작, 끝 좌표 범위에 들어오면서 nowDrawing이 false이면 변경
+//correct함수는 해당 범위에 속하는 좌표를 반환해주기
+//이후 각 함수에 맞게 색깔, 굵기, 채우기 변경
