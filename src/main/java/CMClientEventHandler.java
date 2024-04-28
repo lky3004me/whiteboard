@@ -54,10 +54,12 @@ public class CMClientEventHandler implements CMAppEventHandler {
 
                 CMDataEvent de = (CMDataEvent) cme;
 
-                if(de.getID() == CMDataEvent.REMOVE_USER){
-                    String removedUser = de.getUserName();
-                    //이제 이걸 다른 사용자들에게 전달
-                    System.out.println(removedUser + "님이 나갔습니다.");
+                switch (de.getID()){
+                    case CMSessionEvent.LEAVE_SESSION :
+                        System.out.println("세션 떠남");
+
+                    default:
+                        return;
                 }
 
             case CMInfo.CM_DUMMY_EVENT:
