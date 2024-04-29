@@ -76,7 +76,7 @@ public class CMClientApp extends JFrame implements MouseListener,MouseMotionList
 // login CM server
         System.out.println("user name: ccslab");
         System.out.println("password: ccslabgg");
-        ret = clientStub.loginCM("ccslabgg5", "ccslab");
+        ret = clientStub.loginCM("ccslab2", "ccslab");
         if(ret)
             System.out.println("successfully sent the login request.");
         else {
