@@ -35,13 +35,11 @@ public class CMServerEventHandler implements CMAppEventHandler {
 
             if(de.getID() == CMDataEvent.REMOVE_USER){
                 String removedUser = de.getUserName();
-                //이제 이걸 다른 사용자들에게 전달
-                System.out.println("[SYSTEM] "+removedUser + "님이 나갔습니다.");
+                //System.out.println("[SYSTEM] "+removedUser + "님이 나갔습니다.");
             }
             if(de.getID() == CMDataEvent.NEW_USER){
-                String removedUser = de.getUserName();
-                //이제 이걸 다른 사용자들에게 전달
-                System.out.println("[SYSTEM] "+removedUser + "님이 들어오셨습니다.");
+                String newUser = de.getUserName();
+                //System.out.println("[SYSTEM] "+newUser + "님이 들어오셨습니다.");
             }
             break;
             case CMInfo.CM_DUMMY_EVENT:

@@ -108,9 +108,21 @@ public class TopMenu extends JPanel implements ActionListener {
                 //CMDummyEvent due = new CMDummyEvent();
                 //due.setDummyInfo("[system]#["+se.getUserName()+"] 님이 세션에 입장하였습니다.");
                 //m_clientStub.cast()
-                m_clientStub.leaveSession();
-                m_clientStub.logoutCM();
-                m_clientStub.terminateCM();
+                //m_clientStub.leaveSession();
+                //m_clientStub.logoutCM();
+                //m_clientStub.disconnectFromServer();
+                //m_clientStub.terminateCM();
+                boolean ret = false;
+
+                ret = m_clientStub.logoutCM();
+                if(ret)
+                    System.out.println("successfully sent the log out request.");
+                else {
+                    System.err.println("failed the log out request!");
+                    return;
+                }
+                ret = false;
+                //m_clientStub.terminateCM();
             }
             else if(!isClient && m_serverStub != null){
                 m_serverStub.terminateCM();
