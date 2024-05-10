@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import static java.lang.Math.*;
@@ -203,6 +204,32 @@ class DrawInfo {
         public Vector getVc(){
             return vc;
         }
+
+        public void load(Vector<DrawInfo> input){
+            vc = input;
+            this.repaint();
+        }
+
+        public DrawInfo convertToDrawInfo(LinkedHashMap map){
+            String info = map.get("info").toString();
+            String[] infoParts = info.split("#");
+
+            String type = infoParts[0];
+            int x = Integer.parseInt(infoParts[1]);
+            int y = Integer.parseInt(infoParts[2]);
+            int x1 = Integer.parseInt(infoParts[3]);
+            int y1 = Integer.parseInt(infoParts[4]);
+            int color_R = Integer.parseInt(infoParts[5]);
+            int color_G = Integer.parseInt(infoParts[6]);
+            int color_B = Integer.parseInt(infoParts[7]);
+            boolean fill = Boolean.parseBoolean(infoParts[8]);
+            int thickness = Integer.parseInt(infoParts[9]);
+            boolean nowDrawing = Boolean.parseBoolean(infoParts[10]);
+
+            return new DrawInfo(type,x,y,x1,y1,color_R, color_G, color_B, fill, thickness, nowDrawing);
+        }
+
+
         public void addVc(){
             vclist.add(new Vector());
         }
