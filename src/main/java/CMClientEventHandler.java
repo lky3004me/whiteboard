@@ -14,10 +14,13 @@ import java.io.*;
 public class CMClientEventHandler implements CMAppEventHandler {
     public CMClientStub m_clientStub;
     public DrawInfo.DrawFrame m_drawboard;
-    public CMClientEventHandler (CMClientStub stub, DrawInfo.DrawFrame drawboard)
+
+    public BottomLog m_bottomLog;
+    public CMClientEventHandler (CMClientStub stub, DrawInfo.DrawFrame drawboard, BottomLog bottomLog)
     {
         m_clientStub = stub;
         m_drawboard = drawboard;
+        m_bottomLog = bottomLog;
     }
 
     public void processSessionEvent(CMEvent cme){
@@ -54,14 +57,25 @@ public class CMClientEventHandler implements CMAppEventHandler {
 
                 CMDataEvent de = (CMDataEvent) cme;
 
-                switch (de.getID()){
-                    case CMSessionEvent.LEAVE_SESSION :
-                        System.out.println("세션 떠남");
-
-                    default:
-                        return;
+                if(de.getID() == CMDataEvent.REMOVE_USER){
+                    String removedUser = de.getUserName();
+                    //이제 이걸 다른 사용자들에게 전달
+                    System.out.println("[SYSTEM] "+removedUser + "님이 나갔습니다.");
+                    m_bottomLog.textArea.append("[SYSTEM] "+removedUser + "님이 나갔습니다.\n");
                 }
-
+                if(de.getID() == CMDataEvent.NEW_USER){
+                    String newUser = de.getUserName();
+                    //이제 이걸 다른 사용자들에게 전달
+                    System.out.println("[SYSTEM] "+newUser + "님이 들어오셨습니다.");
+                    m_bottomLog.textArea.append("[SYSTEM] "+newUser + "님이 들어오셨습니다.\n");
+                }
+                int pos = m_bottomLog.textArea.getText().length();
+                m_bottomLog.textArea.setCaretPosition(pos);
+                m_bottomLog.textArea.requestFocus();
+                break;
+            case CMInfo.CM_SESSION_EVENT:
+                processSessionEvent(cme);
+                break;
             case CMInfo.CM_DUMMY_EVENT:
                 processDummyEvent(cme);
                 break;
@@ -72,8 +86,13 @@ public class CMClientEventHandler implements CMAppEventHandler {
     private void processDummyEvent(CMEvent cme)
     {
         CMDummyEvent due = (CMDummyEvent) cme;
-        System.out.println("dummy msg: "+due.getDummyInfo());
-        m_drawboard.receiveDrawInfo(due.getDummyInfo());
+        String[] strArr = due.getDummyInfo().split("#");
+
+        if(strArr[0].equals("[system]")){
+            System.out.println(strArr[0]+" "+strArr[1]);
+        }else{
+            m_drawboard.receiveDrawInfo(due.getDummyInfo());
+        }
         return;
     }
 
