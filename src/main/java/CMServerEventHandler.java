@@ -41,16 +41,19 @@ public class CMServerEventHandler implements CMAppEventHandler {
     private void processSessionEvent(CMEvent cme)
     {
         CMSessionEvent se = (CMSessionEvent) cme;
-        CMDummyEvent due = new CMDummyEvent();
-        due.setDummyInfo("다른 사용자가 종료하였습니다.");
+        //CMDummyEvent due1 = new CMDummyEvent();
+        CMDummyEvent due2 = new CMDummyEvent();
+        //due1.setDummyInfo("다른 사용자가 입장하였습니다.");
+        due2.setDummyInfo("다른 사용자가 종료하였습니다.");
         switch(se.getID())
         {
             case CMSessionEvent.LOGIN:
                 System.out.println("["+se.getUserName()+"] requests login.");
-                userlist.add(se.getUserName());
+                //userlist.add(se.getUserName());
+                //m_serverStub.cast(due1, null, null);
                 break;
-            case CMSessionEvent.LEAVE_SESSION:
-                m_serverStub.cast(due, null, null);
+            case CMSessionEvent.LOGOUT:
+                m_serverStub.cast(due2, null, null);
                 System.out.println("leaveSession");
             default:
                 return;
