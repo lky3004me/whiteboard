@@ -1,9 +1,14 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
 import kr.ac.konkuk.ccslab.cm.stub.CMServerStub;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Vector;
 
 
 public class TopMenu extends JPanel implements ActionListener {
@@ -18,6 +23,9 @@ public class TopMenu extends JPanel implements ActionListener {
     public JButton colorBtn = new JButton("색깔 선택");
     public JButton thickBtn = new JButton("굵기:1");
     public JButton fillBtn = new JButton("채우기 ○");
+    public JButton saveBtn = new JButton("저장");
+    public JButton loadBtn = new JButton("불러오기");
+
 
     public JPanel btnPanel = new JPanel();
     public JPanel colorPalette = new JPanel();
@@ -69,6 +77,12 @@ public class TopMenu extends JPanel implements ActionListener {
 
         changeBtn.addActionListener(this);
         btnPanel.add(changeBtn);
+
+        saveBtn.addActionListener(this);
+        btnPanel.add(saveBtn);
+
+        loadBtn.addActionListener(this);
+        btnPanel.add(loadBtn);
 
         add(btnPanel);
         setBackground(Color.WHITE);
@@ -191,6 +205,43 @@ public class TopMenu extends JPanel implements ActionListener {
                 drawboard.setNowFill(!tmp);
             }
 
+        } else if (e.getSource() == saveBtn) {
+            Vector vc = drawboard.getVc();
+
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+            try{
+                String json = mapper.writeValueAsString(vc);
+
+                File file = new File("saveFile.json");
+                mapper.writeValue(file, vc);
+
+                System.out.println("vc converted to JSON and saved to saveFile.json");
+            }catch (Exception excep){
+                excep.printStackTrace();
+            }
+        } else if (e.getSource() == loadBtn) {
+            Graphics g;
+            try{
+                File file = new File("saveFile.json");
+
+                ObjectMapper mapper = new ObjectMapper();
+
+                LinkedHashMap[] mapArray = mapper.readValue(file, LinkedHashMap[].class);
+
+                Vector<DrawInfo> vc = new Vector<>();
+
+                for(LinkedHashMap map : mapArray){
+                    DrawInfo drawInfo = drawboard.convertToDrawInfo(map);
+                    vc.add(drawInfo);
+                }
+
+                drawboard.load(vc);
+                System.out.println("vc from saveFile.json");
+            }catch (Exception excep){
+                excep.printStackTrace();
+            }
         }
     }
 }
