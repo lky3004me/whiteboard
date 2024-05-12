@@ -4,11 +4,14 @@ import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
 import kr.ac.konkuk.ccslab.cm.stub.CMServerStub;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Vector;
+import java.util.Random;
 
 
 public class TopMenu extends JPanel implements ActionListener {
@@ -41,7 +44,7 @@ public class TopMenu extends JPanel implements ActionListener {
         this.m_clientStub = m_clientStub;
         this.drawboard = drawboard;
         isClient=true;
-        this.setSize(500,200);
+        this.setSize(800,200);
 
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
@@ -76,6 +79,9 @@ public class TopMenu extends JPanel implements ActionListener {
         btnPanel.add(fillBtn);
 
         changeBtn.addActionListener(this);
+        Border border = new LineBorder(drawboard.getlockColor(),2);
+        changeBtn.setPreferredSize(new Dimension(80,30));
+        changeBtn.setBorder(border);
         btnPanel.add(changeBtn);
 
         saveBtn.addActionListener(this);
@@ -92,7 +98,7 @@ public class TopMenu extends JPanel implements ActionListener {
         this.m_serverStub = m_serverStub;
         this.drawboard = drawboard;
         isClient=false;
-        this.setSize(700,200);
+        this.setSize(800,200);
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
         add(new JLabel("메뉴"));
@@ -138,7 +144,7 @@ public class TopMenu extends JPanel implements ActionListener {
                 ret = false;
                 //m_clientStub.terminateCM();
             }
-            else if(!isClient && m_clientStub != null){
+            else if(!isClient && m_serverStub != null){
                 m_serverStub.terminateCM();
             }
             System.exit(0);
@@ -170,7 +176,7 @@ public class TopMenu extends JPanel implements ActionListener {
                     drawboard.setChangeColor(selectedColor);
                     drawboard.setNowColor(selectedColor);
                 }
-                drawboard.changeDrawInfo();
+                drawboard.changeDrawInfo(1,0,0);
             }
             else{
                 Color selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
@@ -191,7 +197,7 @@ public class TopMenu extends JPanel implements ActionListener {
             if(drawboard.getMode().equals("change")) {
                 drawboard.setChangeThickness(thickness);
                 drawboard.setNowThickness(thickness);
-                drawboard.changeDrawInfo();
+                drawboard.changeDrawInfo(0,1,0);
             }
             else {
                 drawboard.setNowThickness(thickness);
@@ -216,7 +222,7 @@ public class TopMenu extends JPanel implements ActionListener {
             if(drawboard.getMode().equals("change")){
                 drawboard.setChangeFill(!tmp);
                 drawboard.setNowFill(!tmp);
-                drawboard.changeDrawInfo();
+                drawboard.changeDrawInfo(0,0,1);
             }else{
                 drawboard.setNowFill(!tmp);
             }
