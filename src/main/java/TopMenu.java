@@ -1,10 +1,14 @@
-import kr.ac.konkuk.ccslab.cm.event.CMDummyEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
 import kr.ac.konkuk.ccslab.cm.stub.CMServerStub;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Vector;
 
 
 public class TopMenu extends JPanel implements ActionListener {
@@ -19,6 +23,9 @@ public class TopMenu extends JPanel implements ActionListener {
     public JButton colorBtn = new JButton("색깔 선택");
     public JButton thickBtn = new JButton("굵기:1");
     public JButton fillBtn = new JButton("채우기 ○");
+    public JButton saveBtn = new JButton("저장");
+    public JButton loadBtn = new JButton("불러오기");
+
 
     public JPanel btnPanel = new JPanel();
     public JPanel colorPalette = new JPanel();
@@ -34,7 +41,7 @@ public class TopMenu extends JPanel implements ActionListener {
         this.m_clientStub = m_clientStub;
         this.drawboard = drawboard;
         isClient=true;
-        this.setSize(800,200);
+        this.setSize(500,200);
 
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
@@ -71,6 +78,12 @@ public class TopMenu extends JPanel implements ActionListener {
         changeBtn.addActionListener(this);
         btnPanel.add(changeBtn);
 
+        saveBtn.addActionListener(this);
+        btnPanel.add(saveBtn);
+
+        loadBtn.addActionListener(this);
+        btnPanel.add(loadBtn);
+
         add(btnPanel);
         setBackground(Color.WHITE);
         setVisible(true);
@@ -79,7 +92,7 @@ public class TopMenu extends JPanel implements ActionListener {
         this.m_serverStub = m_serverStub;
         this.drawboard = drawboard;
         isClient=false;
-        this.setSize(800,200);
+        this.setSize(700,200);
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
         add(new JLabel("메뉴"));
@@ -105,6 +118,7 @@ public class TopMenu extends JPanel implements ActionListener {
             //나갔는지의 상태는 99p CMInfo.CM_login
             //server와 client 둘만 있을 때, server와 client 누가 눌렀는지 식별함
             if(isClient && m_clientStub != null){
+
                 //CMDummyEvent due = new CMDummyEvent();
                 //due.setDummyInfo("[system]#["+se.getUserName()+"] 님이 세션에 입장하였습니다.");
                 //m_clientStub.cast()
@@ -124,7 +138,7 @@ public class TopMenu extends JPanel implements ActionListener {
                 ret = false;
                 //m_clientStub.terminateCM();
             }
-            else if(!isClient && m_serverStub != null){
+            else if(!isClient && m_clientStub != null){
                 m_serverStub.terminateCM();
             }
             System.exit(0);
@@ -207,6 +221,43 @@ public class TopMenu extends JPanel implements ActionListener {
                 drawboard.setNowFill(!tmp);
             }
 
+        } else if (e.getSource() == saveBtn) {
+            Vector vc = drawboard.getVc();
+
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+            try{
+                String json = mapper.writeValueAsString(vc);
+
+                File file = new File("saveFile.json");
+                mapper.writeValue(file, vc);
+
+                System.out.println("vc converted to JSON and saved to saveFile.json");
+            }catch (Exception excep){
+                excep.printStackTrace();
+            }
+        } else if (e.getSource() == loadBtn) {
+            Graphics g;
+            try{
+                File file = new File("saveFile.json");
+
+                ObjectMapper mapper = new ObjectMapper();
+
+                LinkedHashMap[] mapArray = mapper.readValue(file, LinkedHashMap[].class);
+
+                Vector<DrawInfo> vc = new Vector<>();
+
+                for(LinkedHashMap map : mapArray){
+                    DrawInfo drawInfo = drawboard.convertToDrawInfo(map);
+                    vc.add(drawInfo);
+                }
+
+                drawboard.load(vc);
+                System.out.println("vc from saveFile.json");
+            }catch (Exception excep){
+                excep.printStackTrace();
+            }
         }
     }
 }

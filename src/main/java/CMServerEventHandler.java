@@ -29,6 +29,7 @@ public class CMServerEventHandler implements CMAppEventHandler {
     public void processEvent(CMEvent cme) {
         switch(cme.getType())
         {
+
             case CMInfo.CM_DATA_EVENT:
 
             CMDataEvent de = (CMDataEvent) cme;
@@ -42,6 +43,7 @@ public class CMServerEventHandler implements CMAppEventHandler {
                 //System.out.println("[SYSTEM] "+newUser + "님이 들어오셨습니다.");
             }
             break;
+
             case CMInfo.CM_DUMMY_EVENT:
                 processDummyEvent(cme);
                 break;
@@ -54,13 +56,12 @@ public class CMServerEventHandler implements CMAppEventHandler {
     private void processSessionEvent(CMEvent cme)
     {
         CMSessionEvent se = (CMSessionEvent) cme;
-        CMDummyEvent due1 = new CMDummyEvent();
-        CMDummyEvent due2 = new CMDummyEvent();
-        //due1.setDummyInfo("[system]#다른 사용자가 입장하였습니다.");
-        //due2.setDummyInfo("[system]#다른 사용자가 종료하였습니다.");
+        CMDummyEvent due = new CMDummyEvent();
+        due.setDummyInfo("다른 사용자가 종료하였습니다.");
         switch(se.getID())
         {
             case CMSessionEvent.LOGIN:
+
                 due1.setDummyInfo("[system]#["+se.getUserName()+"]님이 입장하였습니다.\n");
                 System.out.println(due1.getDummyInfo());
                 m_serverStub.cast(due1, null, null);
@@ -77,13 +78,8 @@ public class CMServerEventHandler implements CMAppEventHandler {
     }
     private void processDummyEvent(CMEvent cme) {
         CMDummyEvent due = (CMDummyEvent) cme;
-
-        String[] strArr = due.getDummyInfo().split("#");
-        if(strArr[0].equals("[system]")){
-            System.out.println(strArr[0]+" "+strArr[1]);
-        }else{
-            m_drawboard.receiveDrawInfo(due.getDummyInfo());
-        }
+        System.out.println("dummy msg: "+due.getDummyInfo());
+        m_drawboard.receiveDrawInfo(due.getDummyInfo());
         return;
     }
 }
