@@ -31,7 +31,7 @@ public class CMClientApp extends JFrame implements MouseListener,MouseMotionList
     public CMClientApp()
     {
         super("클라이언트");
-        this.setSize(800,800);
+        this.setSize(900,800);
         m_clientStub = new CMClientStub();
         setLocationRelativeTo(null);
         BorderLayout border = new BorderLayout();

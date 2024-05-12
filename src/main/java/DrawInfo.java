@@ -101,7 +101,7 @@ class DrawInfo {
             vc.add(clearInfo);
             this.addMouseListener(this);
             this.addMouseMotionListener(this);
-            this.setSize(800,500);
+            this.setSize(900,500);
             //setLocationRelativeTo(null);
             this.setVisible(true);
             Random random = new Random();
@@ -119,7 +119,7 @@ class DrawInfo {
             vc.add(clearInfo);
             this.addMouseListener(this);
             this.addMouseMotionListener(this);
-            this.setSize(800,500);
+            this.setSize(900,500);
 
 
             //setLocationRelativeTo(null);

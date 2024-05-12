@@ -44,11 +44,11 @@ public class TopMenu extends JPanel implements ActionListener {
         this.m_clientStub = m_clientStub;
         this.drawboard = drawboard;
         isClient=true;
-        this.setSize(800,200);
+        this.setSize(900,200);
 
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
-        add(new JLabel("메뉴"));
+        //add(new JLabel("메뉴"));
 
         //나가기 버튼
         //버튼에 이벤트 핸들러 등록, 상단에 버튼 추가
@@ -98,10 +98,10 @@ public class TopMenu extends JPanel implements ActionListener {
         this.m_serverStub = m_serverStub;
         this.drawboard = drawboard;
         isClient=false;
-        this.setSize(800,200);
+        this.setSize(900,200);
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
-        add(new JLabel("메뉴"));
+        //add(new JLabel("메뉴"));
 
         //나가기 버튼
         //버튼에 이벤트 핸들러 등록, 상단에 버튼 추가
