@@ -62,15 +62,15 @@ public class CMServerEventHandler implements CMAppEventHandler {
         {
             case CMSessionEvent.LOGIN:
 
-                due1.setDummyInfo("[system]#["+se.getUserName()+"]님이 입장하였습니다.\n");
-                System.out.println(due1.getDummyInfo());
-                m_serverStub.cast(due1, null, null);
+                due.setDummyInfo("[system]#["+se.getUserName()+"]님이 입장하였습니다.\n");
+                System.out.println(due.getDummyInfo());
+                m_serverStub.cast(due, null, null);
                 //userlist.add(se.getUserName());
                 break;
             case CMSessionEvent.LOGOUT:
-                due1.setDummyInfo("[system]#["+se.getUserName()+"]님이 떠났습니다.\n");
-                System.out.println(due1.getDummyInfo());
-                m_serverStub.cast(due1, null, null);
+                due.setDummyInfo("[system]#["+se.getUserName()+"]님이 떠났습니다.\n");
+                System.out.println(due.getDummyInfo());
+                m_serverStub.cast(due, null, null);
                 break;
             default:
                 return;
