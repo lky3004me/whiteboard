@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.Random;
 import java.util.Vector;
 
 import static java.lang.Math.*;
@@ -31,8 +32,12 @@ class DrawInfo {
     private int color_B;
     private boolean fill;// 색 채우기 여부
     private int thickness; //선두께
-    private String textcontent; //선두께
+    private String textcontent; //텍스트 내용
     private boolean nowDrawing = false;
+    private int nowChanging = 0;
+    private int lockColor_R;
+    private int lockColor_G;
+    private int lockColor_B;
 
     public DrawInfo(String type, int x, int y, int x1, int y1,
                     int color_R, int color_G, int color_B,
@@ -40,9 +45,15 @@ class DrawInfo {
         this.type = type;
         this.x = x; this.y = y; this.x1 = x1; this.y1 = y1;
         this.color_R = color_R;this.color_G = color_G;this.color_B = color_B;
-        this.color = new Color(color_R,color_G,color_B);
+        if(this.color_R != 123456789) {
+            this.color = new Color(color_R, color_G, color_B);
+        }
         this.fill = fill; this.thickness = thickness; this.nowDrawing = nowDrawing;
         this.textcontent = "";
+        this.nowChanging = 0;
+        this.lockColor_R = -1;
+        this.lockColor_G = -1;
+        this.lockColor_B = -1;
     }
     public void setX(int x){ this.x = x; }
     public void setY(int y){ this.y = y; }
@@ -55,7 +66,7 @@ class DrawInfo {
 
     public String getInfo(){
         //통신으로 보낼 문자열
-        return STR."\{type}#\{x}#\{y}#\{x1}#\{y1}#\{color_R}#\{color_G}#\{color_B}#\{fill}#\{thickness}#\{nowDrawing}#\{textcontent}";
+        return STR."\{type}#\{x}#\{y}#\{x1}#\{y1}#\{color_R}#\{color_G}#\{color_B}#\{fill}#\{thickness}#\{nowDrawing}#\{textcontent}#\{nowChanging}#\{lockColor_R}#\{lockColor_G}#\{lockColor_B}";
     }
     static class DrawFrame extends JPanel implements MouseListener, MouseMotionListener, ItemListener, ActionListener {
         //그림판
@@ -68,16 +79,17 @@ class DrawInfo {
         public Graphics Graphics_buffer; //더블버퍼링
         public Image Img_buffer;
         private String nowType = "pen";
-        private Color nowColor = Color.black;
+        private Color nowColor = java.awt.Color.black;
         private boolean nowFill = false;
         private int nowThickness = 1; //선두께
         private boolean nowDrawing = false;
         private DrawInfo tmpinfo = null;
-        public DrawInfo changeInfo = null;
-        private Color changeColor = Color.black;
+        public DrawInfo changeInfo = new DrawInfo("chan",0,0,0,0,123456789,123456789,123456789,false,0,false);
+        private Color changeColor = java.awt.Color.black;
         private boolean changeFill = false;
         private int changeThickness = 1; //선두께
 
+        private Color ownColor;
         private String textvalue = "";
         Vector chlist = new Vector();
         private DrawInfo clearInfo = new DrawInfo("clear",0,0,0,0,0,0,0,false,0,false);
@@ -92,6 +104,13 @@ class DrawInfo {
             this.setSize(800,500);
             //setLocationRelativeTo(null);
             this.setVisible(true);
+            Random random = new Random();
+            random.setSeed(System.currentTimeMillis());
+            int r = random.nextInt(256);
+            int g = random.nextInt(256);
+            int b = random.nextInt(256);
+            ownColor = new Color(r,g,b);
+
         }
         public DrawFrame(CMServerStub m_serverStub){
             //super("서버");
@@ -119,6 +138,22 @@ class DrawInfo {
             Graphics_buffer.clearRect(0, 0, 800, 500); // 백지화
             for (int i = 0; i < vc.size(); i++) {
                 DrawInfo info = (DrawInfo) vc.elementAt(i);
+                if(info.nowChanging == 1){
+                    Graphics_buffer.setColor(new Color(info.lockColor_R,info.lockColor_G,info.lockColor_B));
+                    ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness+4, BasicStroke.CAP_ROUND, 0));
+                    if (info.type.equals("pen")) {
+                        Graphics_buffer.drawLine(info.getX(), info.getY(), info.getX(), info.getY());
+                    }
+                    if (info.type.equals("line")) {
+                        Graphics_buffer.drawLine(info.getX(), info.getY(), info.getX1(), info.getY1());
+                    }
+                    if (info.type.equals("cir")) {
+                        Graphics_buffer.drawOval(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+                    }
+                    if (info.type.equals("rec")) {
+                        Graphics_buffer.drawRect(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
+                    }
+                }
                 if (info.type.equals("pen")) {
                     Graphics_buffer.setColor(info.color);
                     ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(info.thickness, BasicStroke.CAP_ROUND, 0));
@@ -203,6 +238,8 @@ class DrawInfo {
 
         public void setTextcontent(String t){textvalue = t;}
 
+        public Color getlockColor(){return ownColor;}
+
         public Vector getVc(){
             return vc;
         }
@@ -256,7 +293,7 @@ class DrawInfo {
                 x = e.getX();
                 y = e.getY();
             }
-            chlist.clear();
+            unselectChange();
         }
 
         @Override
@@ -302,8 +339,10 @@ class DrawInfo {
                         di = new DrawInfo(nowType, x1, y1, x, y,0, 0, 0, nowFill, 3, nowDrawing);
 
                     changeInfo = di;
+                    changeInfo.lockColor_R = ownColor.getRed();
+                    changeInfo.lockColor_G = ownColor.getGreen();
+                    changeInfo.lockColor_B = ownColor.getBlue();
                     sendDrawInfo(changeInfo);
-
                     for (int h = 0; h < vc.size(); h++) {
                         DrawInfo chan = (DrawInfo) vc.elementAt(h);
                         if (!chan.type.equals("change")&&!chan.type.equals("clear")) {
@@ -312,9 +351,20 @@ class DrawInfo {
                             }*/
                             if (min(di.getX(),di.getX1())<min(chan.getX(),chan.getX1()) && max(di.getX(),di.getX1()) > max(chan.getX(),chan.getX1()) ) {
                                 if(min(di.getY(),di.getY1())<min(chan.getY(),chan.getY1()) && max(di.getY(),di.getY1()) > max(chan.getY(),chan.getY1())){
-                                    chlist.add(h);
+                                    if(chan.nowChanging==0)
+                                        chlist.add(h);
                                 }
                             }
+                        }
+                    }
+                    if(!chlist.isEmpty()) {
+                        for (int j = 0; j < chlist.size(); j++) {
+                            DrawInfo info = (DrawInfo) vc.elementAt((int) chlist.get(j));
+                            info.nowChanging = 1;
+                            info.lockColor_R = ownColor.getRed();
+                            info.lockColor_G = ownColor.getGreen();
+                            info.lockColor_B = ownColor.getBlue();
+                            vc.set((int) chlist.get(j),info);
                         }
                     }
                     /*
@@ -397,30 +447,77 @@ class DrawInfo {
         public void mouseMoved(MouseEvent e) {
 
         }
-        public void changeDrawInfo(){
+        public void changeDrawInfo(int colorflag,int thickflag,int fillflag){
             if(!chlist.isEmpty()) {
                 for (int j = 0; j < chlist.size(); j++) {
                     DrawInfo info = (DrawInfo) vc.elementAt((int) chlist.get(j));
-                    info.color_R = changeColor.getRed();
-                    info.color_G = changeColor.getGreen();
-                    info.color_B = changeColor.getBlue();
-                    info.color = changeColor;
-                    info.thickness = changeThickness;
-                    info.fill = changeFill;
+                    info.nowChanging = 1;
+                    info.lockColor_R = ownColor.getRed();
+                    info.lockColor_G = ownColor.getGreen();
+                    info.lockColor_B = ownColor.getBlue();
+                    if(colorflag==1){
+                        info.color_R = changeColor.getRed();
+                        info.color_G = changeColor.getGreen();
+                        info.color_B = changeColor.getBlue();
+                        info.color = changeColor;
+                    }
+                    if(thickflag == 1){
+                        info.thickness = changeThickness;
+                    }
+                    if(fillflag == 1){
+                        info.fill = changeFill;
+                    }
                     vc.set((int) chlist.get(j),info);
 
                     //sendDrawInfo(info);
                 }
             }
             changeInfo.type="chan";
-            changeInfo.color_R = changeColor.getRed();
-            changeInfo.color_G = changeColor.getGreen();
-            changeInfo.color_B = changeColor.getBlue();
-            changeInfo.color = changeColor;
-            changeInfo.thickness = changeThickness;
-            changeInfo.fill = changeFill;
+            //플래그 새로 추가하기 번거로워서 기존 색깔 RGB 변수를 플래그로 활용
+            //이렇게 하면 수정할 때 바꾼 값만 바뀌고 안 바꾼 값은 기존 값 유지 가능 -> 자연스러운 수정 가능
+            if(colorflag==1) {
+                //색깔 수정한 경우
+                changeInfo.color_R = changeColor.getRed();
+                changeInfo.color_G = changeColor.getGreen();
+                changeInfo.color_B = changeColor.getBlue();
+                changeInfo.color = changeColor;
+            }else{
+                changeInfo.color_R = 123456789;
+                if(thickflag == 1) {
+                    //굵기 수정한 경우
+                    changeInfo.color_G = 123456879;
+                    changeInfo.thickness = changeThickness;
+                }else{
+
+                    changeInfo.color_G = 999999999;
+                }
+                if(fillflag == 1) {
+                    //채우기 수정한 경우
+                    changeInfo.color_B = 123456879;
+                    changeInfo.fill = changeFill;
+                }else{
+                    changeInfo.color_B = 999999999;
+                }
+                changeInfo.color = new Color(123456789);
+            }
             sendDrawInfo(changeInfo);
             this.repaint();
+        }
+
+        //수정해제
+        public void unselectChange(){
+            if(!chlist.isEmpty()) {
+                for (int j = 0; j < chlist.size(); j++) {
+                    DrawInfo info = (DrawInfo) vc.elementAt((int) chlist.get(j));
+                    info.nowChanging = 0;
+                    info.lockColor_R = -1;
+                    info.lockColor_G = -1;
+                    info.lockColor_B = -1;
+                    vc.set((int) chlist.get(j),info);
+                    sendDrawInfo(info);
+                }
+            }
+            chlist.clear();
         }
 
         public void sendDrawInfo(DrawInfo info){
@@ -428,16 +525,21 @@ class DrawInfo {
                 String strInput = info.getInfo();
                 CMDummyEvent due = new CMDummyEvent();
                 //System.out.println(strInput);
+
+                //서버로 그린 값을 보내서 서버에서 벡터 vc를 일괄적으로 관리하도록함.
                 due.setDummyInfo(strInput);
-                //m_clientStub.send(due, m_clientStub.getDefaultServerName());
+                m_clientStub.send(due, m_clientStub.getDefaultServerName());
+
+
+
 //                CMInteractionInfo interInfo = m_clientStub.getCMInfo().getInteractionInfo();
 //                CMUser myself = interInfo.getMyself();
 //                due.setHandlerSession(myself.getCurrentSession());
 //                due.setHandlerGroup(myself.getCurrentGroup());
-                m_clientStub.cast(due, null,null);
+                //m_clientStub.cast(due, null,null);
                 //m_clientStub.broadcast(due);
-                if(!info.type.equals("clear")&&!info.type.equals("chan"))
-                    vc.add(info);
+                //if(!info.type.equals("clear")&&!info.type.equals("chan"))
+                    //vc.add(info);
             }
         }
         public void receiveDrawInfo(String str){
@@ -447,6 +549,12 @@ class DrawInfo {
             if(strDrawInfo.type.equals("text")){
                 strDrawInfo.textcontent = strArr[11];
             }
+            if(strDrawInfo.type.equals("chan")){
+                strDrawInfo.nowChanging = Integer.parseInt(strArr[12]);
+                strDrawInfo.lockColor_R = Integer.parseInt(strArr[13]);
+                strDrawInfo.lockColor_G = Integer.parseInt(strArr[14]);
+                strDrawInfo.lockColor_B = Integer.parseInt(strArr[15]);
+            }
 
             if(strDrawInfo.type.equals("chan")){
                 for (int h = 0; h < vc.size(); h++) {
@@ -455,12 +563,18 @@ class DrawInfo {
                         if (min(strDrawInfo.getX(),strDrawInfo.getX1())<min(chan.getX(),chan.getX1()) && max(strDrawInfo.getX(),strDrawInfo.getX1()) > max(chan.getX(),chan.getX1()) ) {
                             if(min(strDrawInfo.getY(),strDrawInfo.getY1())<min(chan.getY(),chan.getY1()) && max(strDrawInfo.getY(),strDrawInfo.getY1()) > max(chan.getY(),chan.getY1())){
                                 DrawInfo info = chan;
-                                info.color_R = strDrawInfo.color_R;
-                                info.color_G = strDrawInfo.color_G;
-                                info.color_B = strDrawInfo.color_B;
-                                info.color = new Color(info.color_R,info.color_G,info.color_B);
-                                info.thickness = strDrawInfo.thickness;
-                                info.fill = strDrawInfo.fill;
+                                if(strDrawInfo.color_R != 123456789){
+                                    info.color_R = strDrawInfo.color_R;
+                                    info.color_G = strDrawInfo.color_G;
+                                    info.color_B = strDrawInfo.color_B;
+                                    info.color = new Color(info.color_R,info.color_G,info.color_B);
+                                }
+                                if(strDrawInfo.color_G != 123456789){
+                                    info.thickness = strDrawInfo.thickness;
+                                }
+                                if(strDrawInfo.color_B != 123456789){
+                                    info.fill = strDrawInfo.fill;
+                                }
                                 vc.set(h, info);
                             }
                         }
@@ -489,16 +603,16 @@ class DrawInfo {
             }
             vc.add(strDrawInfo);
             if(!isClient){
-                //CMDummyEvent due = new CMDummyEvent();
+                CMDummyEvent due = new CMDummyEvent();
                 //CMInteractionInfo interInfo = m_serverStub.getCMInfo().getInteractionInfo();
                 //CMUser myself = interInfo.getMyself();
-                //due.setDummyInfo(str);
+                due.setDummyInfo(str);
                 //m_serverStub.broadcast(due);
                 //m_serverStub.send(due, "ccslab");
                 //due.setHandlerSession(myself.getCurrentSession());
                 //due.setHandlerGroup(myself.getCurrentGroup());
                 //System.out.println(str);
-                //m_serverStub.cast(due,null,null);
+                m_serverStub.cast(due,null,null);
                 //m_serverStub.cast(due, myself.getCurrentSession(),myself.getCurrentGroup());
             }
             this.repaint();
