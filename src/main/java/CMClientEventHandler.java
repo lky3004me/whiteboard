@@ -53,6 +53,7 @@ public class CMClientEventHandler implements CMAppEventHandler {
 //        }
         switch(cme.getType())
         {
+            /*
             case CMInfo.CM_DATA_EVENT:
 
                 CMDataEvent de = (CMDataEvent) cme;
@@ -60,19 +61,19 @@ public class CMClientEventHandler implements CMAppEventHandler {
                 if(de.getID() == CMDataEvent.REMOVE_USER){
                     String removedUser = de.getUserName();
                     //이제 이걸 다른 사용자들에게 전달
-                    System.out.println("[SYSTEM] "+removedUser + "님이 나갔습니다.");
-                    m_bottomLog.textArea.append("[SYSTEM] "+removedUser + "님이 나갔습니다.\n");
+                    //System.out.println("[SYSTEM] "+removedUser + "님이 나갔습니다.");
+                    //m_bottomLog.textArea.append("[SYSTEM] "+removedUser + "님이 나갔습니다.\n");
                 }
                 if(de.getID() == CMDataEvent.NEW_USER){
                     String newUser = de.getUserName();
                     //이제 이걸 다른 사용자들에게 전달
-                    System.out.println("[SYSTEM] "+newUser + "님이 들어오셨습니다.");
-                    m_bottomLog.textArea.append("[SYSTEM] "+newUser + "님이 들어오셨습니다.\n");
+                    //System.out.println("[SYSTEM] "+newUser + "님이 들어오셨습니다.");
+                    //.textArea.append("[SYSTEM] "+newUser + "님이 들어오셨습니다.\n");
                 }
-                int pos = m_bottomLog.textArea.getText().length();
-                m_bottomLog.textArea.setCaretPosition(pos);
-                m_bottomLog.textArea.requestFocus();
-                break;
+                //int pos = m_bottomLog.textArea.getText().length()-1;
+                //m_bottomLog.textArea.setCaretPosition(pos);
+                //m_bottomLog.textArea.requestFocus();
+                break;*/
             case CMInfo.CM_SESSION_EVENT:
                 processSessionEvent(cme);
                 break;
@@ -90,6 +91,10 @@ public class CMClientEventHandler implements CMAppEventHandler {
 
         if(strArr[0].equals("[system]")){
             System.out.println(strArr[0]+" "+strArr[1]);
+            m_bottomLog.textArea.append(strArr[0]+" "+strArr[1]);
+            int pos = m_bottomLog.textArea.getText().length()-1;
+            m_bottomLog.textArea.setCaretPosition(pos);
+            m_bottomLog.textArea.requestFocus();
         }else{
             m_drawboard.receiveDrawInfo(due.getDummyInfo());
         }

@@ -29,6 +29,21 @@ public class CMServerEventHandler implements CMAppEventHandler {
     public void processEvent(CMEvent cme) {
         switch(cme.getType())
         {
+
+            case CMInfo.CM_DATA_EVENT:
+
+            CMDataEvent de = (CMDataEvent) cme;
+
+            if(de.getID() == CMDataEvent.REMOVE_USER){
+                String removedUser = de.getUserName();
+                //System.out.println("[SYSTEM] "+removedUser + "님이 나갔습니다.");
+            }
+            if(de.getID() == CMDataEvent.NEW_USER){
+                String newUser = de.getUserName();
+                //System.out.println("[SYSTEM] "+newUser + "님이 들어오셨습니다.");
+            }
+            break;
+
             case CMInfo.CM_DUMMY_EVENT:
                 processDummyEvent(cme);
                 break;
@@ -46,12 +61,17 @@ public class CMServerEventHandler implements CMAppEventHandler {
         switch(se.getID())
         {
             case CMSessionEvent.LOGIN:
-                System.out.println("["+se.getUserName()+"] requests login.");
-                userlist.add(se.getUserName());
+
+                due1.setDummyInfo("[system]#["+se.getUserName()+"]님이 입장하였습니다.\n");
+                System.out.println(due1.getDummyInfo());
+                m_serverStub.cast(due1, null, null);
+                //userlist.add(se.getUserName());
                 break;
-            case CMSessionEvent.LEAVE_SESSION:
-                m_serverStub.cast(due, null, null);
-                System.out.println("leaveSession");
+            case CMSessionEvent.LOGOUT:
+                due1.setDummyInfo("[system]#["+se.getUserName()+"]님이 떠났습니다.\n");
+                System.out.println(due1.getDummyInfo());
+                m_serverStub.cast(due1, null, null);
+                break;
             default:
                 return;
         }
