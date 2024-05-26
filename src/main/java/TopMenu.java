@@ -163,8 +163,18 @@ public class TopMenu extends JPanel implements ActionListener {
         }
         else if(e.getSource() == textBtn){
             drawboard.setMode("text");
+            if(drawboard.getMode().equals("change")) {
+                String text = JOptionPane.showInputDialog("수정할 텍스트를 입력하세요");
+                drawboard.setTextcontent(text);
+                drawboard.changeDrawInfo(0,0,0,1);
+            }
+            else {
+                String text = JOptionPane.showInputDialog("텍스트를 입력하세요");
+                drawboard.setTextcontent(text);
+            }
+            /*
             String text = JOptionPane.showInputDialog("텍스트를 입력하세요");
-            drawboard.setTextcontent(text);
+            drawboard.setTextcontent(text);*/
         }
         else if(e.getSource() == changeBtn){
             drawboard.setMode("change");
@@ -176,7 +186,7 @@ public class TopMenu extends JPanel implements ActionListener {
                     drawboard.setChangeColor(selectedColor);
                     drawboard.setNowColor(selectedColor);
                 }
-                drawboard.changeDrawInfo(1,0,0);
+                drawboard.changeDrawInfo(1,0,0,0);
             }
             else{
                 Color selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
@@ -197,7 +207,7 @@ public class TopMenu extends JPanel implements ActionListener {
             if(drawboard.getMode().equals("change")) {
                 drawboard.setChangeThickness(thickness);
                 drawboard.setNowThickness(thickness);
-                drawboard.changeDrawInfo(0,1,0);
+                drawboard.changeDrawInfo(0,1,0,0);
             }
             else {
                 drawboard.setNowThickness(thickness);
@@ -222,7 +232,7 @@ public class TopMenu extends JPanel implements ActionListener {
             if(drawboard.getMode().equals("change")){
                 drawboard.setChangeFill(!tmp);
                 drawboard.setNowFill(!tmp);
-                drawboard.changeDrawInfo(0,0,1);
+                drawboard.changeDrawInfo(0,0,1,0);
             }else{
                 drawboard.setNowFill(!tmp);
             }

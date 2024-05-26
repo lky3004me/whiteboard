@@ -61,7 +61,6 @@ public class CMServerEventHandler implements CMAppEventHandler {
         switch(se.getID())
         {
             case CMSessionEvent.LOGIN:
-
                 due.setDummyInfo("[system]#["+se.getUserName()+"]님이 입장하였습니다.\n");
                 System.out.println(due.getDummyInfo());
                 m_serverStub.cast(due, null, null);
