@@ -64,6 +64,19 @@ public class CMServerEventHandler implements CMAppEventHandler {
                 due.setDummyInfo("[system]#["+se.getUserName()+"]님이 입장하였습니다.\n");
                 System.out.println(due.getDummyInfo());
                 m_serverStub.cast(due, null, null);
+
+                //모든 사용자의 vc 제거
+                due.setDummyInfo("clear#0#0#0#0#0#0#0#false#0#false");
+                m_serverStub.cast(due, null, null);
+
+                Vector<DrawInfo> vc = m_drawboard.getVc();
+                for(DrawInfo info : vc){
+                    String drawInfoString = info.toSerializedString();
+                    due.setDummyInfo(drawInfoString);
+                    m_serverStub.cast(due, null, null);
+                }
+
+
                 //userlist.add(se.getUserName());
                 break;
             case CMSessionEvent.LOGOUT:
