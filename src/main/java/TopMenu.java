@@ -123,8 +123,11 @@ public class TopMenu extends JPanel implements ActionListener {
             //그러나 나갔다는 기록을 알리는게 없어서 주의 필요
             //나갔는지의 상태는 99p CMInfo.CM_login
             //server와 client 둘만 있을 때, server와 client 누가 눌렀는지 식별함
-            if(isClient && m_clientStub != null){
 
+            if(isClient && m_clientStub != null){
+                if(drawboard.getMode().equals("change")) {
+                    drawboard.unselectChange();
+                }
                 //CMDummyEvent due = new CMDummyEvent();
                 //due.setDummyInfo("[system]#["+se.getUserName()+"] 님이 세션에 입장하였습니다.");
                 //m_clientStub.cast()

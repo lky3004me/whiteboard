@@ -111,7 +111,7 @@ class DrawInfo {
             //super("클라이언트");
             this.m_clientStub = m_clientStub;
             isClient = true;
-            vc.add(clearInfo);
+            //vc.add(clearInfo);
             this.addMouseListener(this);
             this.addMouseMotionListener(this);
             this.setSize(900,500);
@@ -261,9 +261,10 @@ class DrawInfo {
 
         public void load(Vector<DrawInfo> input){
             sendDrawInfo(clearInfo);
-            vc = input;
-            for (int i = 0; i < vc.size(); i++) {
-                DrawInfo info = (DrawInfo) vc.elementAt(i);
+            //vc = input;
+            for (int i = 0; i < input.size(); i++) {
+                //DrawInfo info = (DrawInfo) vc.elementAt(i);
+                DrawInfo info = (DrawInfo) input.elementAt(i);
                 sendDrawInfo(info);
             }
             this.repaint();
@@ -584,12 +585,14 @@ class DrawInfo {
         }
         public void receiveDrawInfo(String str){
             String[] strArr = str.split("#");
+            System.out.println("receive : "+str);
             DrawInfo strDrawInfo = new DrawInfo(strArr[0],Integer.parseInt(strArr[1]),Integer.parseInt(strArr[2]),Integer.parseInt(strArr[3]),Integer.parseInt(strArr[4]),
                     Integer.parseInt(strArr[5]),Integer.parseInt(strArr[6]),Integer.parseInt(strArr[7]),Boolean.parseBoolean(strArr[8]),Integer.parseInt(strArr[9]),Boolean.parseBoolean(strArr[10]));
+
             if(strDrawInfo.type.equals("text")){
                 strDrawInfo.textcontent = strArr[11];
             }
-            if(strDrawInfo.type.equals("chan")){
+            if(!strDrawInfo.type.equals("clear")){
                 strDrawInfo.nowChanging = Integer.parseInt(strArr[12]);
                 strDrawInfo.lockColor_R = Integer.parseInt(strArr[13]);
                 strDrawInfo.lockColor_G = Integer.parseInt(strArr[14]);
@@ -683,7 +686,7 @@ class DrawInfo {
 
             if(strDrawInfo.type.equals("clear")){
                 vc.clear();
-                vc.add(clearInfo);
+                //vc.add(clearInfo);
             }
             vc.add(strDrawInfo);
             if(!isClient){

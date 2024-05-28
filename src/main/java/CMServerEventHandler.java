@@ -71,7 +71,9 @@ public class CMServerEventHandler implements CMAppEventHandler {
 
                 Vector<DrawInfo> vc = m_drawboard.getVc();
                 for(DrawInfo info : vc){
-                    String drawInfoString = info.toSerializedString();
+                    //String drawInfoString = info.toSerializedString();
+                    String drawInfoString = info.getInfo();
+                    System.out.println("new "+drawInfoString);
                     due.setDummyInfo(drawInfoString);
                     m_serverStub.cast(due, null, null);
                 }
