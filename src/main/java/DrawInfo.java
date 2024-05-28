@@ -10,10 +10,7 @@ import kr.ac.konkuk.ccslab.cm.stub.CMServerStub;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
 
 import static java.lang.Math.*;
 
@@ -96,6 +93,7 @@ class DrawInfo {
         private boolean nowFill = false;
         private int nowThickness = 1; //선두께
         private boolean nowDrawing = false;
+        private boolean selected = false;
         private DrawInfo tmpinfo = null;
         public DrawInfo changeInfo = new DrawInfo("chan",0,0,0,0,123456789,123456789,123456789,false,0,false);
         private Color changeColor = java.awt.Color.black;
@@ -168,6 +166,17 @@ class DrawInfo {
                     if (info.type.equals("rec")) {
                         Graphics_buffer.drawRect(info.getX(), info.getY(), (info.getX1()-info.getX()), (info.getY1()-info.getY()));
                     }
+                    if(info.type.equals("text")){
+                        int width = Graphics_buffer.getFontMetrics().stringWidth(info.textcontent);
+                        int height = Graphics_buffer.getFontMetrics().getHeight();
+                        info.setX1(info.getX()+width);
+                        info.setY1(info.getY()+height);
+                        Graphics_buffer.setFont(new Font("default", Font.ITALIC,15));
+                        Graphics_buffer.setColor(new Color(info.lockColor_R,info.lockColor_G,info.lockColor_B));
+                        ((Graphics2D) Graphics_buffer).setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, 0));
+                        Graphics_buffer.drawLine(info.getX(), info.getY() + 1, info.getX1(), info.getY() + 1);
+                        Graphics_buffer.drawString(info.textcontent, info.getX(), info.getY());
+                    }
                 }
                 if (info.type.equals("pen")) {
                     Graphics_buffer.setColor(info.color);
@@ -212,7 +221,8 @@ class DrawInfo {
                 }
                 else if (info.type.equals("text")) {
                     Graphics_buffer.setColor(info.color);
-                    Graphics_buffer.drawString(info.textcontent, info.getX1(), info.getY1());
+                    Graphics_buffer.setFont(new Font("default", Font.PLAIN,15));
+                    Graphics_buffer.drawString(info.textcontent, info.getX(), info.getY());
                 }
                 else{
 
@@ -258,6 +268,7 @@ class DrawInfo {
         public Vector getVc(){
             return vc;
         }
+        public boolean getSelected(){ return selected;}
 
         public void load(Vector<DrawInfo> input){
             sendDrawInfo(clearInfo);
@@ -314,9 +325,10 @@ class DrawInfo {
                 x = e.getX();
                 y = e.getY();
             }
-            if(nowType.equals("change")) {
+            if(nowType.equals("change")){
                 unselectChange();
             }
+
         }
 
         @Override
@@ -529,7 +541,7 @@ class DrawInfo {
                     }else{
                         changeInfo.color_B = 999999999;
                         if(textflag == 1) {
-                            //채우기 수정한 경우)
+                            //텍스트 수정한 경우)
                             changeInfo.textcontent = textvalue;
                         }
                     }
@@ -553,6 +565,8 @@ class DrawInfo {
                     vc.set((int) chlist.get(j),info);
                 }
             }*/
+            selected = false;
+            System.out.println("unselected: "+selected);
             changeInfo.nowChanging = 0;
             changeInfo.color_R = 123456789;
             changeInfo.color_G = 123456789;
@@ -599,7 +613,8 @@ class DrawInfo {
                 strDrawInfo.lockColor_B = Integer.parseInt(strArr[15]);
             }
             if(strDrawInfo.type.equals("chan")){
-
+                strDrawInfo.textcontent = strArr[11];
+                int changecount = 0;
                 for (int h = 0; h < vc.size(); h++) {
                     DrawInfo chan = (DrawInfo) vc.elementAt(h);
 
@@ -607,6 +622,9 @@ class DrawInfo {
                         if (min(strDrawInfo.getX(),strDrawInfo.getX1())<min(chan.getX(),chan.getX1()) && max(strDrawInfo.getX(),strDrawInfo.getX1()) > max(chan.getX(),chan.getX1()) ) {
                             if(min(strDrawInfo.getY(),strDrawInfo.getY1())<min(chan.getY(),chan.getY1()) && max(strDrawInfo.getY(),strDrawInfo.getY1()) > max(chan.getY(),chan.getY1())){
                                 DrawInfo info = chan;
+                                selected = true;
+                                changecount++;
+                                System.out.println("change:"+selected);
                                 if(info.nowChanging == 0){
                                     info.nowChanging = strDrawInfo.nowChanging;
                                     info.lockColor_R = strDrawInfo.lockColor_R;
@@ -626,9 +644,10 @@ class DrawInfo {
                                         if(strDrawInfo.color_B != 123456789){
                                             info.fill = strDrawInfo.fill;
                                         }
-//                                        if(strDrawInfo.color_R == 123456789 && strDrawInfo.color_G == 123456789 && strDrawInfo.color_B == 123456789){
-//                                            info.textcontent =
-//                                        }
+                                        if(info.type.equals("text")&& !strDrawInfo.textcontent.isEmpty()) {
+                                            info.textcontent = strDrawInfo.textcontent;
+                                        }
+
                                     }
                                     else if(info.lockColor_R == -1){
 
@@ -669,7 +688,9 @@ class DrawInfo {
                         }
                     }
                 }
-
+                if(changecount==0){
+                    selected = false;
+                }
             /*
                 strDrawInfo.textcontent = strArr[11];
                 DrawInfo info = (DrawInfo) vc.elementAt(Integer.parseInt(strDrawInfo.textcontent));

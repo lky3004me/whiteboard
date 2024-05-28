@@ -49,7 +49,7 @@ public class TopMenu extends JPanel implements ActionListener {
         FlowLayout flow = new FlowLayout(FlowLayout.LEFT);
         this.setLayout(flow);
         //add(new JLabel("메뉴"));
-
+        allbtnUnselect(true);
         //나가기 버튼
         //버튼에 이벤트 핸들러 등록, 상단에 버튼 추가
         exitBtn.addActionListener(this);
@@ -70,6 +70,9 @@ public class TopMenu extends JPanel implements ActionListener {
         btnPanel.add(textBtn);
 
         colorBtn.addActionListener(this);
+        Border colborder = new LineBorder(drawboard.getlockColor(),2);
+        changeBtn.setPreferredSize(new Dimension(80,30));
+        changeBtn.setBorder(colborder);
         btnPanel.add(colorBtn);
 
         thickBtn.addActionListener(this);
@@ -79,9 +82,6 @@ public class TopMenu extends JPanel implements ActionListener {
         btnPanel.add(fillBtn);
 
         changeBtn.addActionListener(this);
-        Border border = new LineBorder(drawboard.getlockColor(),2);
-        changeBtn.setPreferredSize(new Dimension(80,30));
-        changeBtn.setBorder(border);
         btnPanel.add(changeBtn);
 
         saveBtn.addActionListener(this);
@@ -112,10 +112,21 @@ public class TopMenu extends JPanel implements ActionListener {
         setBackground(Color.WHITE);
         setVisible(true);
     }
-
+    public void allbtnUnselect(boolean chan){
+        penBtn.setFont(new Font("default",Font.PLAIN,12));
+        lineBtn.setFont(new Font("default",Font.PLAIN,12));
+        cirBtn.setFont(new Font("default",Font.PLAIN,12));
+        recBtn.setFont(new Font("default",Font.PLAIN,12));
+        textBtn.setFont(new Font("default",Font.PLAIN,12));
+        colorBtn.setFont(new Font("default",Font.PLAIN,12));
+        thickBtn.setFont(new Font("default",Font.PLAIN,12));
+        fillBtn.setFont(new Font("default",Font.PLAIN,12));
+        if(chan){
+            changeBtn.setFont(new Font("default",Font.PLAIN,12));
+        }
+    }
     @Override
     public void actionPerformed(ActionEvent e) {
-
         if (e.getSource() == exitBtn){
             //terminate를 제외하면 접속 해제를 알리는 기능이 존재
             //m_clientStub.leaveSession();
@@ -153,26 +164,40 @@ public class TopMenu extends JPanel implements ActionListener {
             System.exit(0);
         }
         else if(e.getSource() == penBtn){
+            allbtnUnselect(true);
+            penBtn.setFont(new Font("default",Font.BOLD,12));
             drawboard.setMode("pen");
         }
         else if(e.getSource() == lineBtn){
+            allbtnUnselect(true);
+            lineBtn.setFont(new Font("default",Font.BOLD,12));
             drawboard.setMode("line");
         }
         else if(e.getSource() == cirBtn){
+            allbtnUnselect(true);
+            cirBtn.setFont(new Font("default",Font.BOLD,12));
             drawboard.setMode("cir");
         }
         else if(e.getSource() == recBtn){
+            allbtnUnselect(true);
+            recBtn.setFont(new Font("default",Font.BOLD,12));
             drawboard.setMode("rec");
         }
         else if(e.getSource() == textBtn){
-            drawboard.setMode("text");
-            if(drawboard.getMode().equals("change")) {
-                String text = JOptionPane.showInputDialog("수정할 텍스트를 입력하세요");
+            String text;
+            System.out.println(drawboard.getSelected());
+            if(drawboard.getSelected() && drawboard.getMode().equals("change")) {
+                allbtnUnselect(false);
+                textBtn.setFont(new Font("default",Font.BOLD,12));
+                text = JOptionPane.showInputDialog("수정할 텍스트를 입력하세요");
                 drawboard.setTextcontent(text);
                 drawboard.changeDrawInfo(0,0,0,1);
             }
             else {
-                String text = JOptionPane.showInputDialog("텍스트를 입력하세요");
+                allbtnUnselect(true);
+                textBtn.setFont(new Font("default",Font.BOLD,12));
+                drawboard.setMode("text");
+                text = JOptionPane.showInputDialog("텍스트를 입력하세요");
                 drawboard.setTextcontent(text);
             }
             /*
@@ -180,10 +205,14 @@ public class TopMenu extends JPanel implements ActionListener {
             drawboard.setTextcontent(text);*/
         }
         else if(e.getSource() == changeBtn){
+            allbtnUnselect(false);
+            changeBtn.setFont(new Font("default",Font.BOLD,12));
             drawboard.setMode("change");
         }else if(e.getSource() == colorBtn) {
+            Color selectedColor;
             if(drawboard.getMode().equals("change")){
-                Color selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
+                colorBtn.setFont(new Font("default",Font.BOLD,12));
+                selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
 
                 if (selectedColor != null) {
                     drawboard.setChangeColor(selectedColor);
@@ -192,12 +221,17 @@ public class TopMenu extends JPanel implements ActionListener {
                 drawboard.changeDrawInfo(1,0,0,0);
             }
             else{
-                Color selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
+                colorBtn.setFont(new Font("default",Font.BOLD,12));
+                selectedColor = chooser.showDialog(null, "Color palette", Color.BLACK);
 
                 if (selectedColor != null) {
                     drawboard.setNowColor(selectedColor);
                 }
             }
+
+            Border border = new LineBorder(selectedColor,2);
+            colorBtn.setPreferredSize(new Dimension(80,30));
+            colorBtn.setBorder(border);
 
         }else if (e.getSource() == thickBtn){
             thickness *= 2;
@@ -208,11 +242,13 @@ public class TopMenu extends JPanel implements ActionListener {
 
             thickBtn.setText("굵기:" + thickness);
             if(drawboard.getMode().equals("change")) {
+                thickBtn.setFont(new Font("default",Font.BOLD,12));
                 drawboard.setChangeThickness(thickness);
                 drawboard.setNowThickness(thickness);
                 drawboard.changeDrawInfo(0,1,0,0);
             }
             else {
+                thickBtn.setFont(new Font("default",Font.BOLD,12));
                 drawboard.setNowThickness(thickness);
             }
         }else if(e.getSource() == fillBtn){
@@ -233,10 +269,12 @@ public class TopMenu extends JPanel implements ActionListener {
             boolean tmp = drawboard.getNowFill();
 
             if(drawboard.getMode().equals("change")){
+                fillBtn.setFont(new Font("default",Font.BOLD,12));
                 drawboard.setChangeFill(!tmp);
                 drawboard.setNowFill(!tmp);
                 drawboard.changeDrawInfo(0,0,1,0);
             }else{
+                fillBtn.setFont(new Font("default",Font.BOLD,12));
                 drawboard.setNowFill(!tmp);
             }
 
