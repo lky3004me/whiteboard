@@ -296,8 +296,10 @@ class DrawInfo {
             boolean fill = Boolean.parseBoolean(infoParts[8]);
             int thickness = Integer.parseInt(infoParts[9]);
             boolean nowDrawing = Boolean.parseBoolean(infoParts[10]);
-
-            return new DrawInfo(type,x,y,x1,y1,color_R, color_G, color_B, fill, thickness, nowDrawing);
+            String textcontent = (infoParts[11]);
+            DrawInfo returnInfo = new DrawInfo(type,x,y,x1,y1,color_R, color_G, color_B, fill, thickness, nowDrawing);
+            returnInfo.textcontent = textcontent;
+            return returnInfo;
         }
 
 
