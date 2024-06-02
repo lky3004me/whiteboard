@@ -65,7 +65,7 @@ class DrawInfo {
         //통신으로 보낼 문자열
         return STR."\{type}#\{x}#\{y}#\{x1}#\{y1}#\{color_R}#\{color_G}#\{color_B}#\{fill}#\{thickness}#\{nowDrawing}#\{textcontent}#\{nowChanging}#\{lockColor_R}#\{lockColor_G}#\{lockColor_B}";
     }
-
+/*
     public String toSerializedString() {
         StringBuilder base = new StringBuilder(type + "#" + x + "#" + y + "#" + x1 + "#" + y1 + "#" +
                 color_R + "#" + color_G + "#" + color_B + "#" +
@@ -77,7 +77,7 @@ class DrawInfo {
             base.append("#").append(lockColor_R).append("#").append(lockColor_G).append("#").append(lockColor_B);
         }
         return base.toString();
-    }
+    }*/
     static class DrawFrame extends JPanel implements MouseListener, MouseMotionListener, ItemListener, ActionListener {
         //그림판
         private Vector vclist = new Vector<Vector>();
@@ -427,7 +427,6 @@ class DrawInfo {
                 }
                 //System.out.println(vc.size());
                 this.repaint();
-
             }
         }
 
